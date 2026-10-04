@@ -1,0 +1,340 @@
+/* ===== General Reset ===== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+
+/* ===== Light Mode ===== */
+body {
+  background-color: #fff;
+  color: #333;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* ===== Navbar ===== */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.2rem 4rem;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.logo {
+  font-size: 1.8em;
+  font-weight: 700;
+  background: linear-gradient(90deg, #1db1bc, #3e46b0);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: #333;
+  font-weight: 500;
+  position: relative;
+  transition: 0.3s;
+}
+
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 3px;
+  bottom: -4px;
+  left: 0;
+  background: #36d1dc;
+  transition: width 0.3s;
+}
+
+.nav-links a:hover::after,
+.nav-links a.active::after {
+  width: 100%;
+}
+
+/* Toggle Button */
+.toggle-btn {
+  background: linear-gradient(90deg, #36d1dc, #5b86e5);
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 25px;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.toggle-btn:hover {
+  transform: scale(1.08);
+  box-shadow: 0 0 20px #36d1dc;
+}
+
+/* ===== Profile / Card Styling ===== */
+.login-section {
+  text-align: center;
+  padding: 5rem 2rem;
+}
+
+.card {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 2rem 3rem;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+  transition: 0.4s;
+  max-width: 400px;
+  margin: 2rem auto;
+  text-align: left;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 0 25px rgba(91,134,229,0.6);
+}
+
+.card p {
+  color: #444;
+  margin: 0.5rem 0;
+  font-weight: 500;
+}
+
+/* Buttons */
+.login-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.login-buttons button {
+  padding: 0.8rem 1.5rem;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  font-weight: 600;
+  color: #fff;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.login-buttons button:hover {
+  transform: translateY(-3px);
+}
+
+/* Specific Buttons */
+.login-buttons button:nth-child(1) {
+  background: linear-gradient(135deg, #36d1dc, #5b86e5); /* Edit */
+}
+
+.login-buttons button:nth-child(2) {
+  background: linear-gradient(135deg, #ff4b2b, #ff416c); /* Logout / Cancel */
+}
+
+/* ===== Edit Form Styling ===== */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 400px;
+  margin: 2rem auto;
+  text-align: left;
+}
+
+form label {
+  font-weight: 500;
+  color: #333;
+}
+
+form input, form select {
+  padding: 0.8rem 1rem;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  outline: none;
+  font-size: 1rem;
+}
+
+form input:focus, form select:focus {
+  border-color: #36d1dc;
+  box-shadow: 0 0 8px rgba(54, 209, 220, 0.5);
+}
+
+/* Submit / Save Button */
+form button {
+  background: linear-gradient(135deg, #34a853, #0f9d58);
+  color: #fff;
+  font-weight: 600;
+  padding: 0.8rem 1.5rem;
+  border-radius: 25px;
+  cursor: pointer;
+  border: none;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+form button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 0 15px #34a853;
+}
+
+/* ===== Dark Mode ===== */
+body.dark-mode {
+  background: linear-gradient(135deg, #000000, #1a1a1a, #2c2c2c);
+  color: #f1f1f1;
+}
+
+body.dark-mode .navbar {
+  background-color: #222;
+}
+
+body.dark-mode .nav-links a {
+  color: #fff;
+}
+
+body.dark-mode .card {
+  background: rgba(255,255,255,0.1);
+  color: #f1f1f1;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+}
+
+body.dark-mode .card p {
+  color: #ddd;
+}
+
+body.dark-mode form label {
+  color: #f1f1f1;
+}
+
+body.dark-mode form input, body.dark-mode form select {
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+  border: 1px solid #555;
+}
+
+body.dark-mode form input:focus, body.dark-mode form select:focus {
+  border-color: #36d1dc;
+  box-shadow: 0 0 8px rgba(54, 209, 220, 0.5);
+}
+
+body.dark-mode form button {
+  background: linear-gradient(135deg, #36d1dc, #5b86e5);
+}
+
+body.dark-mode .login-buttons button:nth-child(1) {
+  background: linear-gradient(135deg, #36d1dc, #5b86e5);
+}
+
+body.dark-mode .login-buttons button:nth-child(2) {
+  background: linear-gradient(135deg, #ff416c, #ff4b2b);
+}
+
+/* Dropdown Arrow for Dark Mode */
+body.dark-mode select {
+  background-image: url("data:image/svg+xml;charset=US-ASCII,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24'><path fill='%2336d1dc' d='M7 10l5 5 5-5z'/></svg>");
+}
+/* ===== Profile Dropdown ===== */
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropbtn {
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 25px;
+  font-weight: 600;
+  cursor: pointer;
+  background: linear-gradient(90deg, #36d1dc, #5b86e5);
+  color: #fff;
+  transition: 0.3s;
+}
+
+.dropbtn:hover {
+  transform: scale(1.05);
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  right: 0;
+  background: rgba(255,255,255,0.95);
+  min-width: 160px;
+  border-radius: 12px;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+  overflow: hidden;
+  z-index: 10;
+}
+
+.dropdown-content a {
+  color: #333;
+  padding: 10px 16px;
+  text-decoration: none;
+  display: block;
+  transition: 0.3s;
+}
+
+.dropdown-content a:hover {
+  background: linear-gradient(90deg,#36d1dc,#5b86e5);
+  color: #fff;
+}
+
+/* Dark mode support for dropdown */
+body.dark-mode .dropdown-content {
+  background: #333;
+}
+
+body.dark-mode .dropdown-content a {
+  color: #f1f1f1;
+}
+
+body.dark-mode .dropdown-content a:hover {
+  background: linear-gradient(90deg,#1db1bc,#3e46b0);
+}
+
+/* Show dropdown when hovering */
+.dropdown:hover .dropdown-content {
+  display: block;
+}
+.record-section {
+  text-align: center;
+  margin-top: 30px;
+}
+
+#preview {
+  width: 320px;
+  height: 240px;
+  border-radius: 10px;
+  border: 2px solid #4CAF50;
+  margin-bottom: 10px;
+}
+
+.record-buttons button {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  margin: 5px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.record-buttons button:disabled {
+  background-color: #aaa;
+  cursor: not-allowed;
+}
+#playback {
+  width: 320px;
+  height: 240px;
+  border-radius: 10px;
+  border: 2px solid #2196f3;
+}
