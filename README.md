@@ -89,7 +89,7 @@
 
 ##  AI Models
 
-### `gaze_detector.py` — Gaze & Attention Tracking
+### `gaze — Gaze & Attention Tracking
 - Built on **MediaPipe Face Mesh** with 468 facial landmarks
 - Computes iris position to determine gaze direction (left / right / up / down / center)
 - Calculates head yaw and pitch for off-screen attention detection
@@ -141,33 +141,7 @@
 
 ---
 
-## Database Schema
 
-### `candidates.db`
-```
-candidates
-├── id            INTEGER PRIMARY KEY
-├── name          TEXT
-├── email         TEXT UNIQUE
-├── password_hash TEXT
-├── photo_path    TEXT          ← used for DeepFace verification
-└── created_at    TIMESTAMP
-```
-
-### `ai_results.db`
-```
-results
-├── id             INTEGER PRIMARY KEY
-├── meeting_id     TEXT          ← links all AI signals to one session
-├── candidate_id   INTEGER
-├── timestamp      TIMESTAMP
-├── emotion        TEXT
-├── gaze_direction TEXT
-├── identity_match REAL
-├── person_count   INTEGER
-├── voice_score    REAL
-└── flags          TEXT          ← JSON array of anomaly events
-```
 
 ---
 
