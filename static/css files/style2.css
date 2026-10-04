@@ -1,0 +1,293 @@
+/* ===== General Page Styling ===== */
+body {
+  margin: 0;
+  font-family: "Poppins", sans-serif;
+  background: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  transition: back-ground 0.5s, color 0.5s;
+  color:black;
+}
+
+/* ===== Auth Section Box ===== */
+.auth-section {
+  background: rgba(255, 255, 255, 0.08);
+  padding: 45px 35px;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  width: 380px;
+  backdrop-filter: blur(15px);
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.auth-section:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 35px rgba(54, 209, 220, 0.4);
+}
+
+/* ===== Title ===== */
+.auth-section h2 {
+  margin-bottom: 25px;
+  font-size: 2rem;
+  color: #36d1dc;
+  text-shadow: 0 0 8px rgba(54, 209, 220, 0.7);
+}
+
+/* ===== Tabs (Switch between Client / Candidate) ===== */
+.tabs {
+  margin-bottom: 25px;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.tabs button {
+  padding: 10px 18px;
+  border: none;
+  border-radius: 12px;
+  background: #ffd500;
+  color: #000;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.tabs button:hover {
+  background: #fff;
+  transform: scale(1.05);
+  box-shadow: 0 0 10px #ffd500;
+}
+
+/* ===== Form Styling ===== */
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.auth-form input,
+.auth-form textarea {
+  padding: 12px 14px;
+  border: none;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  font-size: 15px;
+  transition: all 0.3s ease;
+  outline: none;
+}
+
+.auth-form input:focus,
+.auth-form textarea:focus {
+  box-shadow: 0 0 10px #36d1dc;
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* ===== Submit Button ===== */
+.auth-form button {
+  padding: 12px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #36d1dc, #5b86e5);
+  color: #fff;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.auth-form button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 15px #36d1dc;
+  background: linear-gradient(135deg, #5b86e5, #36d1dc);
+}
+
+/* ===== Hidden Class ===== */
+.hidden {
+  display: none;
+}
+
+/* ===== Optional Glow Effect ===== */
+.auth-form input:hover,
+.auth-form textarea:hover {
+  box-shadow: 0 0 8px rgba(54, 209, 220, 0.5);
+}
+
+/* ===== Dark Mode ===== */
+body.dark-mode {
+  background: linear-gradient(135deg, #000000, #1a1a1a, #2c2c2c);
+  color: #fff;
+}
+
+body.dark-mode .auth-section {
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: 0 10px 30px rgba(54, 209, 220, 0.2);
+}
+
+body.dark-mode .tabs button {
+  background: #36d1dc;
+  color: #000;
+}
+
+body.dark-mode .tabs button:hover {
+  background: #5b86e5;
+  box-shadow: 0 0 10px #36d1dc;
+}
+
+body.dark-mode .auth-form input,
+body.dark-mode .auth-form textarea {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+body.dark-mode .auth-form input:focus,
+body.dark-mode .auth-form textarea:focus {
+  box-shadow: 0 0 10px #5b86e5;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+body.dark-mode .auth-form button {
+  background: linear-gradient(135deg, #5b86e5, #36d1dc);
+}
+
+body.dark-mode .auth-form button:hover {
+  box-shadow: 0 0 15px #5b86e5;
+}
+
+/* ===== Scroll Animation ===== */
+.auth-section,
+.tabs button,
+.auth-form input,
+.auth-form textarea,
+.auth-form button {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.show {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+}
+
+/* ===== Neon Glow on Hover ===== */
+.tabs button:hover {
+  transform: scale(1.05);
+  background: linear-gradient(135deg, #ffd500, #fff700);
+  box-shadow: 0 0 15px #ffd500, 0 0 30px #ffd50080, 0 0 45px #ffd50050;
+}
+
+.auth-form input:hover,
+.auth-form textarea:hover {
+  box-shadow: 0 0 10px #36d1dc, 0 0 20px #36d1dc60;
+}
+
+.auth-form button:hover {
+  transform: scale(1.05);
+  background: linear-gradient(135deg, #5b86e5, #36d1dc);
+  box-shadow: 0 0 15px #36d1dc, 0 0 25px #36d1dc80, 0 0 35px #36d1dc50;
+}
+
+@keyframes neonPulse {
+  0%, 100% {
+    box-shadow: 0 0 10px #36d1dc, 0 0 20px #36d1dc40, 0 0 30px #36d1dc20;
+  }
+  50% {
+    box-shadow: 0 0 20px #36d1dc, 0 0 40px #36d1dc60, 0 0 60px #36d1dc30;
+  }
+}
+
+.auth-form button {
+  animation: neonPulse 3s infinite alternate;
+}
+
+/* ===== Fade-in + Slide-up Animation ===== */
+.tab-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.tab-item.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ===== Navbar ===== */
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: center; /* center links */
+  padding: 1rem 2rem;
+  background: rgba(255,255,255,0.1);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 100;
+  gap: 2rem;
+}
+
+/* Navbar links container */
+.nav-links {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex: 1;
+}
+
+/* Navbar link text color for light mode */
+.nav-links a {
+  text-decoration: none;
+  color: #333;  /* Dark text in light mode */
+  font-weight: 500;
+  transition: color 0.3s;
+}
+
+.nav-links a:hover {
+  color: #36d1dc;
+}
+
+/* Dark mode navbar link colors */
+body.dark-mode .nav-links a {
+  color: #fff;  /* Light text in dark mode */
+}
+
+body.dark-mode .nav-links a:hover {
+  color: #36d1dc;
+}
+
+/* Dark mode toggle button */
+.toggle-btn {
+  padding: 8px 15px;
+  font-weight: bold;
+  border-radius: 10px;
+  border: none;
+  background: linear-gradient(135deg, #ff7e5f, #feb47b);
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.toggle-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 10px #feb47b, 0 0 20px #ff7e5f50;
+  background: linear-gradient(135deg, #feb47b, #ff7e5f);
+}
+
+body.dark-mode .toggle-btn {
+  background: linear-gradient(135deg, #36d1dc, #5b86e5);
+}
+
+body.dark-mode .toggle-btn:hover {
+  box-shadow: 0 0 10px #36d1dc, 0 0 20px #36d1dc50;
+  background: linear-gradient(135deg, #5b86e5, #36d1dc);
+}
+
