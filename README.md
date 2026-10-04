@@ -262,13 +262,7 @@ Each report is uniquely indexed by **Meeting ID** and contains:
 
 ---
 
-## 🚀 Project Demo
 
-📹 **Demo Video:** [Watch AuthentiHire Demo on Google Drive](https://drive.google.com/file/d/1EnufvASqCudZEAo807JKMTkNAI-b1f3k/view?usp=drivesdk)
-
----
-
-<div align="center">
 
 
 
