@@ -1,0 +1,1473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meeting — AuthentiHire</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
+<style>
+
+/* ╔══════════════════════════════════════════════════════╗
+   ║  RESET & ROOT                                        ║
+   ╚══════════════════════════════════════════════════════╝ */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+:root {
+  --ink:         #07080a;
+  --ink2:        #0a0b0e;
+  --bone:        #f0ebe0;
+  --gold:        #c9a84c;
+  --gold-light:  #e8c870;
+  --gold-dim:    rgba(201,168,76,0.14);
+  --charcoal:    #141618;
+  --panel:       #0e1012;
+  --surface:     #111315;
+  --mid:         #252830;
+  --muted:       #565966;
+  --border:      rgba(255,255,255,0.06);
+  --border-g:    rgba(201,168,76,0.2);
+  --success:     #4ecb9e;
+  --warn:        #e0a844;
+  --danger:      #e05858;
+  --nav-h:       56px;
+  --hdr-h:       32px;
+  --ctrl-h:      58px;
+  --r:           10px;
+}
+
+html, body {
+  height: 100%; overflow: hidden;
+  background: var(--ink);
+  color: var(--bone);
+  font-family: 'Outfit', sans-serif;
+  font-size: 13px;
+}
+
+/* ╔══════════════════════════════════════════════════════╗
+   ║  CURSOR                                              ║
+   ╚══════════════════════════════════════════════════════╝ */
+#_cur  { width:7px;height:7px;background:var(--gold);border-radius:50%;position:fixed;top:0;left:0;pointer-events:none;z-index:99999;transform:translate(-50%,-50%);transition:top .04s,left .04s; }
+#_ring { width:28px;height:28px;border:1.5px solid rgba(201,168,76,.45);border-radius:50%;position:fixed;top:0;left:0;pointer-events:none;z-index:99998;transform:translate(-50%,-50%);transition:width .25s,height .25s,border-color .25s,top .07s,left .07s; }
+body:has(button:hover) #_ring,
+body:has(a:hover) #_ring { width:44px;height:44px;border-color:var(--gold); }
+
+/* ╔══════════════════════════════════════════════════════╗
+   ║  PARTICLE CANVAS                                     ║
+   ╚══════════════════════════════════════════════════════╝ */
+#bg-canvas { position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.18; }
+
+/* ╔══════════════════════════════════════════════════════╗
+   ║  NAVBAR                                              ║
+   ╚══════════════════════════════════════════════════════╝ */
+nav {
+  position: fixed; top:0; left:0; right:0;
+  height: var(--nav-h);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 1.4rem;
+  background: rgba(7,8,10,.92);
+  backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+  border-bottom: 1px solid var(--border);
+  z-index: 1000;
+  gap: 1rem;
+}
+
+.logo {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.55rem; font-weight: 700; letter-spacing:.01em;
+  color: var(--bone); text-decoration: none; line-height:1; white-space: nowrap;
+}
+.logo span { color:var(--gold); font-style:italic; }
+
+/* centre pill */
+.nav-centre {
+  display: flex; align-items: center; gap:.55rem;
+  background: rgba(255,255,255,.025);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  padding: .28rem .55rem;
+  white-space: nowrap;
+}
+.live-dot {
+  width:7px;height:7px;border-radius:50%;
+  background:var(--success);flex-shrink:0;
+  box-shadow:0 0 8px var(--success);
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1;box-shadow:0 0 8px var(--success)} 50%{opacity:.45;box-shadow:0 0 3px var(--success)} }
+
+.live-label {
+  font-size:.68rem;font-weight:700;color:var(--muted);
+  letter-spacing:.1em;text-transform:uppercase;
+}
+.mid-pill {
+  font-size:.78rem;font-weight:600;color:var(--gold);letter-spacing:.04em;
+  padding:.2rem .75rem;
+  background:rgba(201,168,76,.09);
+  border:1px solid var(--border-g);
+  border-radius:100px;
+}
+
+.nav-right { display:flex;align-items:center;gap:.5rem;flex-shrink:0; }
+
+.nav-icon-btn {
+  width:32px;height:32px;border-radius:8px;
+  border:1px solid var(--border);background:rgba(255,255,255,.03);
+  color:var(--muted);cursor:pointer;font-size:.8rem;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .2s;
+}
+.nav-icon-btn:hover { border-color:var(--border-g);color:var(--gold);background:rgba(201,168,76,.08); }
+
+#inviteBtn {
+  display:flex;align-items:center;gap:.38rem;
+  padding:.3rem .85rem;
+  border:1px solid var(--border-g);background:rgba(201,168,76,.09);
+  color:var(--gold);border-radius:8px;
+  font-family:'Outfit',sans-serif;font-size:.68rem;font-weight:700;
+  letter-spacing:.07em;text-transform:uppercase;cursor:pointer;
+  transition:all .2s;
+}
+#inviteBtn:hover { background:rgba(201,168,76,.18); }
+
+.nav-link {
+  padding:.28rem .7rem;
+  background:transparent;border:1px solid var(--border);
+  color:var(--muted);border-radius:100px;
+  font-family:'Outfit',sans-serif;font-size:.68rem;font-weight:500;
+  letter-spacing:.07em;text-transform:uppercase;
+  text-decoration:none;cursor:pointer;
+  transition:border-color .2s,color .2s;
+}
+.nav-link:hover { border-color:var(--border-g);color:var(--gold); }
+
+/* ╔══════════════════════════════════════════════════════╗
+   ║  MEETING ID HEADER STRIP                             ║
+   ╚══════════════════════════════════════════════════════╝ */
+header {
+  position: fixed;
+  top: var(--nav-h); left:0; right:0;
+  height: var(--hdr-h);
+  display: flex; align-items: center; justify-content: center; gap: 1.8rem;
+  background: rgba(10,11,14,.82);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  z-index: 900;
+  font-size:.72rem;font-weight:500;
+}
+
+.meeting-id {
+  display:flex;align-items:center;gap:.5rem;
+  font-family:'Outfit',sans-serif;
+  color:var(--muted);letter-spacing:.05em;
+}
+.meeting-id strong {
+  font-family:'Outfit',monospace;
+  font-weight:700;color:var(--gold);letter-spacing:.06em;
+}
+
+.hdr-sep { width:1px;height:16px;background:var(--border); }
+
+.ai-live-flag {
+  display:flex;align-items:center;gap:.45rem;
+  font-size:.62rem;font-weight:700;color:var(--bone);
+  letter-spacing:.1em;text-transform:uppercase;
+  padding:.2rem .7rem;
+  background:rgba(78,203,158,.08);
+  border:1px solid rgba(78,203,158,.2);
+  border-radius:100px;
+}
+.ai-live-flag .f-dot {
+  width:5px;height:5px;border-radius:50%;background:var(--success);
+  box-shadow:0 0 6px var(--success);
+  animation:pulse 2s infinite;
+}
+
+/* ╔══════════════════════════════════════════════════════╗
+   ║  MEETING CONTAINER                                   ║
+   ╚══════════════════════════════════════════════════════╝ */
+#meetingContainer {
+  position: fixed;
+  top: calc(var(--nav-h) + var(--hdr-h));
+  left:0; right:0;
+  bottom:0;
+  display:flex;
+  z-index: 1;
+  overflow: hidden;
+}
+
+/* ╔══════════════════════════════════════════════════════╗
+   ║  VIDEO AREA                                          ║
+   ╚══════════════════════════════════════════════════════╝ */
+#videos {
+  flex: 1 1 0;
+  position: relative;
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-auto-rows: minmax(140px, auto);
+  overflow: hidden;
+  background: var(--ink2);
+  min-width: 0;
+}
+
+/* subtle grid ticks on the video bg */
+#videos::before {
+  content:'';
+  position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(201,168,76,.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(201,168,76,.025) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events:none;z-index:0;
+}
+
+.videoContainer {
+  position: relative;
+  border-radius: var(--r);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: #060709;
+  transition: border-color .3s, box-shadow .35s;
+  z-index: 1;
+}
+
+/* gold shimmer on top edge on hover */
+.videoContainer::before {
+  content:'';
+  position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg, transparent, var(--gold), transparent);
+  transform:scaleX(0);transition:transform .45s;
+  z-index:4;pointer-events:none;
+}
+.videoContainer:hover::before { transform:scaleX(1); }
+.videoContainer:hover {
+  border-color: var(--border-g);
+  box-shadow: 0 0 28px rgba(201,168,76,.07), inset 0 0 0 1px rgba(201,168,76,.05);
+}
+
+video {
+  width:100%;height:100%;
+  object-fit:contain;
+  background:#000;
+  border-radius:calc(var(--r) - 1px);
+  display:block;
+}
+
+.videoLabel {
+  position:absolute;bottom:9px;left:9px;
+  background:rgba(7,8,10,.78);
+  backdrop-filter:blur(8px);
+  color:var(--bone);
+  padding:3px 10px;
+  border-radius:100px;
+  font-size:.62rem;font-weight:700;
+  letter-spacing:.09em;text-transform:uppercase;
+  z-index:10;border:1px solid var(--border);
+}
+
+/* ── LOCAL PIP ── */
+#localContainer {
+  position:absolute;
+  bottom:18px;right:18px;
+  width:188px;height:140px;
+  border-radius:var(--r);
+  background:var(--charcoal);
+  border:1px solid var(--border-g);
+  cursor:move;z-index:20;overflow:hidden;
+  box-shadow:0 12px 40px rgba(0,0,0,.65), 0 0 0 1px rgba(201,168,76,.08);
+  transition:box-shadow .25s;
+}
+#localContainer::before {
+  content:'';
+  position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);
+  z-index:5;pointer-events:none;
+}
+#localContainer:hover {
+  box-shadow:0 16px 48px rgba(0,0,0,.75),0 0 0 1px rgba(201,168,76,.25);
+}
+#localContainer video {
+  width:100%;height:100%;
+  border-radius:0;object-fit:cover;cursor:move;background:#000;
+}
+#localContainer .videoLabel {
+  bottom:5px;left:6px;font-size:.56rem;
+}
+
+/* ── PIP drag handle hint ── */
+#localContainer::after {
+  content:'';
+  position:absolute;top:6px;left:50%;transform:translateX(-50%);
+  width:24px;height:2px;border-radius:1px;
+  background:rgba(201,168,76,.35);
+  pointer-events:none;z-index:6;
+}
+
+/* ╔══════════════════════════════════════════════════════╗
+   ║  SIDEBAR                                             ║
+   ╚══════════════════════════════════════════════════════╝ */
+#sidebar {
+  width: 284px;
+  flex-shrink:0;
+  display:flex;flex-direction:column;
+  background:var(--panel);
+  border-left:1px solid var(--border);
+  min-height:0;
+  position:relative;
+}
+
+/* ── TABS ── */
+#tabs {
+  display:flex;
+  background:rgba(7,8,10,.65);
+  border-bottom:1px solid var(--border);
+  padding:.45rem .5rem 0;
+  gap:.35rem;
+  flex-shrink:0;
+}
+.tabBtn {
+  flex:1;border:none;background:transparent;
+  color:var(--muted);cursor:pointer;
+  padding:.45rem .5rem .58rem;
+  font-family:'Outfit',sans-serif;
+  font-size:.65rem;font-weight:700;
+  letter-spacing:.1em;text-transform:uppercase;
+  border-bottom:2px solid transparent;
+  transition:color .2s,border-color .2s;
+}
+.tabBtn.active  { color:var(--gold);border-bottom-color:var(--gold); }
+.tabBtn:hover:not(.active) { color:var(--bone); }
+
+/* ── TAB PANELS ── */
+.tabContent {
+  flex:1;display:none;flex-direction:column;
+  overflow:hidden;min-height:0;
+}
+.tabContent.active { display:flex; }
+
+/* ── Active Speaker (class added by videochat.js) ── */
+.videoContainer.activeSpeaker {
+  border-color: var(--gold) !important;
+  box-shadow: 0 0 0 2px rgba(201,168,76,.35), 0 0 28px rgba(201,168,76,.18) !important;
+}
+.videoContainer.activeSpeaker::before { transform: scaleX(1) !important; }
+
+/* ── CHAT ── */
+#messages {
+  flex:1;overflow-y:auto;
+  padding:.75rem;
+  display:flex;flex-direction:column;gap:.4rem;
+  scrollbar-width:thin;scrollbar-color:var(--mid) transparent;
+}
+
+/* videochat.js creates plain <div> with innerText "HH:MM:SS - Me: ..." or "HH:MM:SS - Peer: ..." */
+#messages > div {
+  padding:.5rem .85rem;
+  border-radius:9px;
+  font-size:.8rem;font-weight:300;line-height:1.5;
+  max-width:88%;
+  word-break:break-word;
+  position:relative;
+  border:1px solid var(--border);
+  background:var(--charcoal);
+  color:var(--bone);
+  align-self:flex-start;
+}
+
+/* "Me:" messages — align right with gold tint */
+#messages > div[style*="color"] {
+  /* raise-hand notifications */
+  background:rgba(201,168,76,.06) !important;
+  border-color:rgba(201,168,76,.2) !important;
+  color:#ffd700 !important;
+  align-self:center;
+  text-align:center;
+  font-size:.75rem;
+  font-style:italic;
+}
+
+/* We style Me vs Peer via JS-injected text prefix detection using CSS trick */
+/* Since JS sets innerText "HH:MM:SS - Me: msg", we use a sibling approach in JS override below */
+.msg-me {
+  align-self:flex-end !important;
+  background:rgba(201,168,76,.1) !important;
+  border-color:rgba(201,168,76,.2) !important;
+  border-bottom-right-radius:3px !important;
+}
+.msg-peer {
+  align-self:flex-start !important;
+  background:var(--charcoal) !important;
+  border-color:var(--border) !important;
+  border-bottom-left-radius:3px !important;
+}
+
+.chat-foot {
+  display:flex;gap:.45rem;
+  padding:.6rem;
+  border-top:1px solid var(--border);
+  background:rgba(7,8,10,.42);
+  flex-shrink:0;
+}
+#chatInput {
+  flex:1;padding:.55rem .85rem;
+  background:var(--charcoal);border:1px solid var(--border);
+  border-radius:8px;color:var(--bone);
+  font-family:'Outfit',sans-serif;font-size:.8rem;font-weight:300;
+  outline:none;transition:border-color .2s;
+}
+#chatInput::placeholder { color:var(--muted); }
+#chatInput:focus { border-color:var(--border-g); }
+#sendBtn {
+  width:34px;height:34px;border-radius:8px;
+  background:var(--gold);color:var(--ink);
+  border:none;cursor:pointer;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.78rem;transition:all .2s;
+}
+#sendBtn:hover { background:var(--gold-light);transform:translateY(-1px); }
+
+/* ── PARTICIPANTS ── */
+#participantsTab { padding:.8rem; overflow-y:auto; }
+#participantsList {
+  flex:1;overflow-y:auto;
+  display:flex;flex-direction:column;gap:.4rem;
+  scrollbar-width:thin;scrollbar-color:var(--mid) transparent;
+}
+
+/* videochat.js creates: <div class="participant"><div class="avatar">X</div> Name</div> */
+.participant {
+  display:flex;align-items:center;gap:.65rem;
+  padding:.6rem .75rem;
+  background:var(--charcoal);
+  border:1px solid var(--border);
+  border-radius:9px;
+  font-size:.82rem;font-weight:500;color:var(--bone);
+  transition:border-color .2s;
+}
+.participant:hover { border-color:var(--border-g); }
+
+.avatar {
+  width:30px;height:30px;border-radius:7px;
+  background:rgba(201,168,76,.1);border:1px solid var(--border-g);
+  display:flex;align-items:center;justify-content:center;
+  font-size:.72rem;font-weight:700;color:var(--gold);flex-shrink:0;
+  text-transform:uppercase;
+}
+
+/* ── AI STATUS STRIP ── */
+.ai-strip {
+  flex-shrink:0;
+  padding:.65rem .85rem;
+  border-top:1px solid var(--border);
+  background:rgba(7,8,10,.55);
+}
+.ai-strip-ttl {
+  font-size:.58rem;font-weight:700;color:var(--gold);
+  letter-spacing:.14em;text-transform:uppercase;
+  margin-bottom:.5rem;
+  display:flex;align-items:center;gap:.4rem;
+}
+.ai-strip-ttl::after { content:'';flex:1;height:1px;background:var(--border-g); }
+.ai-grid { display:grid;grid-template-columns:1fr 1fr;gap:.35rem; }
+.ai-ind {
+  display:flex;align-items:center;gap:.38rem;
+  padding:.3rem .48rem;
+  background:rgba(255,255,255,.02);
+  border:1px solid var(--border);
+  border-radius:6px;
+  font-size:.62rem;font-weight:500;color:var(--muted);
+  transition:border-color .3s,color .3s;
+}
+.ai-ind .d { width:5px;height:5px;border-radius:50%;flex-shrink:0;background:var(--muted); }
+.ai-ind.ok   { color:var(--bone);border-color:rgba(78,203,158,.2); }
+.ai-ind.ok   .d { background:var(--success);box-shadow:0 0 5px var(--success); }
+.ai-ind.warn { color:var(--bone);border-color:rgba(224,168,68,.25); }
+.ai-ind.warn .d { background:var(--warn);box-shadow:0 0 5px var(--warn); }
+.ai-ind.err  { color:var(--bone);border-color:rgba(224,88,88,.25); }
+.ai-ind.err  .d { background:var(--danger);box-shadow:0 0 5px var(--danger); }
+
+/* ╔══════════════════════════════════════════════════════╗
+   ║  CONTROLS BAR                                        ║
+   ╚══════════════════════════════════════════════════════╝ */
+#controls {
+  flex-shrink:0;
+  display:flex;justify-content:center;align-items:center;
+  gap:.45rem;
+  padding:.55rem .65rem;
+  background:rgba(7,8,10,.72);
+  backdrop-filter:blur(10px);
+  border-top:1px solid var(--border);
+  height: var(--ctrl-h);
+}
+#controls button {
+  width:40px;height:40px;border-radius:10px;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.04);
+  color:var(--muted);cursor:pointer;
+  font-size:.92rem;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .2s;position:relative;
+}
+#controls button:hover {
+  background:rgba(255,255,255,.09);
+  border-color:rgba(255,255,255,.14);
+  color:var(--bone);transform:translateY(-2px);
+}
+#controls button.active {
+  background:rgba(201,168,76,.12);border-color:var(--border-g);color:var(--gold);
+}
+#controls button.muted-state {
+  background:rgba(224,88,88,.1);border-color:rgba(224,88,88,.3);color:var(--danger);
+}
+#leaveBtn {
+  background:rgba(224,88,88,.1) !important;
+  border-color:rgba(224,88,88,.3) !important;
+  color:var(--danger) !important;
+  margin-left:.5rem;
+}
+#leaveBtn:hover {
+  background:rgba(224,88,88,.2) !important;
+  border-color:rgba(224,88,88,.5) !important;
+  color:#ff8080 !important;
+}
+
+/* tooltip */
+#controls button[data-tip]::after {
+  content:attr(data-tip);
+  position:absolute;bottom:calc(100% + 7px);left:50%;transform:translateX(-50%);
+  background:var(--charcoal);border:1px solid var(--border);
+  color:var(--bone);font-family:'Outfit',sans-serif;
+  font-size:.58rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;
+  padding:3px 8px;border-radius:4px;white-space:nowrap;
+  pointer-events:none;opacity:0;transition:opacity .15s;
+}
+#controls button[data-tip]:hover::after { opacity:1; }
+
+.ctrl-sep { width:1px;height:26px;background:var(--border);margin:0 .15rem;flex-shrink:0; }
+
+/* ╔══════════════════════════════════════════════════════╗
+   ║  AI DETECTION PANEL (replaces flooding toasts)       ║
+   ╚══════════════════════════════════════════════════════╝ */
+
+/* Floating toggle button — bottom-left of screen, above controls */
+#ai-panel-toggle {
+  position: fixed;
+  bottom: calc(var(--ctrl-h) + 12px);
+  left: 14px;
+  z-index: 8000;
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  border: 1px solid var(--border-g);
+  background: rgba(201,168,76,.12);
+  color: var(--gold);
+  cursor: pointer;
+  font-size: .9rem;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .22s;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 20px rgba(0,0,0,.45);
+}
+#ai-panel-toggle:hover {
+  background: rgba(201,168,76,.22);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(201,168,76,.18);
+}
+/* Badge showing unread alert count */
+#ai-panel-toggle .ai-badge {
+  position: absolute;
+  top: -5px; right: -5px;
+  width: 17px; height: 17px;
+  border-radius: 50%;
+  background: var(--danger);
+  color: #fff;
+  font-size: .55rem; font-weight: 700;
+  display: none; align-items: center; justify-content: center;
+  border: 2px solid var(--ink);
+}
+#ai-panel-toggle .ai-badge.visible { display: flex; }
+
+/* The sliding panel */
+#ai-panel {
+  position: fixed;
+  bottom: calc(var(--ctrl-h) + 66px); /* above the toggle button */
+  left: 14px;
+  width: 292px;
+  max-height: 420px;
+  z-index: 7999;
+  background: var(--panel);
+  border: 1px solid var(--border-g);
+  border-radius: 14px;
+  box-shadow: 0 20px 56px rgba(0,0,0,.7), 0 0 0 1px rgba(201,168,76,.06);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+  /* hidden by default */
+  opacity: 0;
+  transform: translateY(14px) scale(.97);
+  pointer-events: none;
+  transition: opacity .24s cubic-bezier(.22,1,.36,1), transform .24s cubic-bezier(.22,1,.36,1);
+}
+#ai-panel.open {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+.ai-panel-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: .7rem .9rem .55rem;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.ai-panel-title {
+  font-size: .68rem; font-weight: 700; color: var(--gold);
+  letter-spacing: .12em; text-transform: uppercase;
+  display: flex; align-items: center; gap: .45rem;
+}
+.ai-panel-title .f-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--success); box-shadow: 0 0 6px var(--success);
+  animation: pulse 2s infinite;
+}
+.ai-panel-clear {
+  font-size: .6rem; font-weight: 600; color: var(--muted);
+  letter-spacing: .08em; text-transform: uppercase;
+  background: none; border: none; cursor: pointer;
+  padding: .2rem .5rem; border-radius: 5px;
+  transition: color .2s;
+}
+.ai-panel-clear:hover { color: var(--bone); }
+
+/* Scrollable log list */
+#ai-panel-log {
+  flex: 1; overflow-y: auto;
+  padding: .55rem .6rem;
+  display: flex; flex-direction: column; gap: .35rem;
+  scrollbar-width: thin; scrollbar-color: var(--mid) transparent;
+}
+#ai-panel-log:empty::after {
+  content: 'No detections yet…';
+  color: var(--muted); font-size: .72rem; font-style: italic;
+  text-align: center; padding: 1rem 0;
+  display: block;
+}
+
+.ai-log-item {
+  display: flex; align-items: flex-start; gap: .5rem;
+  padding: .42rem .55rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--charcoal);
+  animation: logIn .2s ease forwards;
+}
+@keyframes logIn { from{opacity:0;transform:translateX(-8px)} to{opacity:1;transform:none} }
+
+.ai-log-item.ok   { border-color: rgba(78,203,158,.18); }
+.ai-log-item.warn { border-color: rgba(224,168,68,.2); }
+.ai-log-item.err  { border-color: rgba(224,88,88,.2); }
+
+.ai-log-icon {
+  width: 24px; height: 24px; border-radius: 6px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .72rem;
+}
+.ai-log-item.ok   .ai-log-icon { background:rgba(78,203,158,.1); color:var(--success); }
+.ai-log-item.warn .ai-log-icon { background:rgba(224,168,68,.1); color:var(--warn); }
+.ai-log-item.err  .ai-log-icon { background:rgba(224,88,88,.1);  color:var(--danger); }
+
+.ai-log-body { flex: 1; min-width: 0; }
+.ai-log-name {
+  font-size: .6rem; font-weight: 700; letter-spacing: .08em;
+  text-transform: uppercase; margin-bottom: 2px;
+}
+.ai-log-item.ok   .ai-log-name { color: var(--success); }
+.ai-log-item.warn .ai-log-name { color: var(--warn); }
+.ai-log-item.err  .ai-log-name { color: var(--danger); }
+.ai-log-status {
+  font-size: .72rem; font-weight: 300; color: var(--bone); line-height: 1.4;
+  word-break: break-word;
+}
+.ai-log-time {
+  font-size: .56rem; color: var(--muted); margin-top: 2px;
+}
+
+/* ╔══════════════════════════════════════════════════════╗
+   ║  CAMERA ERROR OVERLAY                                ║
+   ╚══════════════════════════════════════════════════════╝ */
+#overlay {
+  position:absolute;inset:0;
+  background:rgba(7,8,10,.92);
+  backdrop-filter:blur(14px);
+  color:var(--bone);
+  display:none;
+  justify-content:center;align-items:center;
+  text-align:center;
+  z-index:100;
+}
+.overlay-card {
+  max-width:360px;padding:2.4rem;
+  background:var(--charcoal);
+  border:1px solid var(--border-g);
+  border-radius:16px;
+  box-shadow:0 24px 64px rgba(0,0,0,.6);
+}
+.overlay-icon { font-size:2rem;color:var(--danger);margin-bottom:.9rem; }
+.overlay-title {
+  font-family:'Cormorant Garamond',serif;
+  font-size:1.55rem;font-weight:700;color:var(--bone);
+  margin-bottom:.45rem;
+}
+.overlay-msg { font-size:.82rem;font-weight:300;color:var(--muted);line-height:1.7; }
+
+/* ╔══════════════════════════════════════════════════════╗
+   ║  DEBUG STATUS                                        ║
+   ╚══════════════════════════════════════════════════════╝ */
+#debugStatus {
+  position:fixed;bottom:12px;right:12px;
+  background:rgba(7,8,10,.88);
+  border:1px solid var(--border);
+  color:var(--success);
+  padding:4px 12px;border-radius:100px;
+  font-family:'Outfit',monospace;
+  font-size:.6rem;font-weight:500;letter-spacing:.07em;
+  z-index:9999;backdrop-filter:blur(8px);
+  max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+
+/* scrollbars */
+::-webkit-scrollbar { width:3px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--mid);border-radius:2px; }
+</style>
+</head>
+
+<body>
+
+<!-- ── CURSOR ── -->
+<div id="_cur"></div>
+<div id="_ring"></div>
+
+<!-- ── PARTICLE CANVAS ── -->
+<canvas id="bg-canvas"></canvas>
+
+<!-- ════════════ NAVBAR ════════════ -->
+<nav>
+  <div class="logo">Authenti<span>Hire</span></div>
+
+  <div class="nav-centre">
+    <span class="live-dot"></span>
+    <span class="live-label">Live</span>
+    <div class="mid-pill">ID: {{ meeting_id }}</div>
+  </div>
+
+  <div class="nav-right">
+    <button id="inviteBtn"><i class="fa-solid fa-link"></i>&nbsp;Copy Link</button>
+    <a href="/"            class="nav-link">Home</a>
+    <a href="/about"       class="nav-link">About</a>
+    <a href="/profile"     class="nav-link">Profile</a>
+    <a href="/clientportal" class="nav-link">Exit</a>
+    <button class="nav-icon-btn" id="darkModeBtn" title="Toggle Theme">
+      <i class="fa-solid fa-moon"></i>
+    </button>
+  </div>
+</nav>
+
+<!-- ════════════ HEADER STRIP ════════════ -->
+<header>
+  <div class="meeting-id">Meeting ID &nbsp;<strong>{{ meeting_id }}</strong></div>
+  <div class="hdr-sep"></div>
+  <div class="ai-live-flag">
+    <span class="f-dot"></span>
+    AI Monitoring Active
+  </div>
+</header>
+
+<!-- ════════════ MEETING BODY ════════════ -->
+<div id="meetingContainer">
+
+  <!-- VIDEO GRID -->
+  <div id="videos">
+    <div class="videoContainer" id="localContainer">
+      <video id="localVideo" autoplay muted playsinline></video>
+      <div class="videoLabel">You</div>
+    </div>
+  </div>
+
+  <!-- SIDEBAR -->
+  <div id="sidebar">
+
+    <!-- Tabs -->
+    <div id="tabs">
+      <button class="tabBtn active" data-tab="chatTab">Chat</button>
+      <button class="tabBtn"        data-tab="participantsTab">People</button>
+    </div>
+
+    <!-- Chat -->
+    <div class="tabContent active" id="chatTab">
+      <div id="messages"></div>
+      <div class="chat-foot">
+        <input id="chatInput" placeholder="Send a message…">
+        <button id="sendBtn"><i class="fa-solid fa-paper-plane"></i></button>
+      </div>
+    </div>
+
+    <!-- Participants -->
+    <div class="tabContent" id="participantsTab">
+      <div id="participantsList"></div>
+    </div>
+
+    <!-- AI detection strip -->
+    <div class="ai-strip">
+      <div class="ai-strip-ttl">AI Detection</div>
+      <div class="ai-grid">
+        <div class="ai-ind" id="ind-deepfake"><span class="d"></span>Deepfake</div>
+        <div class="ai-ind" id="ind-liveness"><span class="d"></span>Liveness</div>
+        <div class="ai-ind" id="ind-multiperson"><span class="d"></span>Multi-Person</div>
+        <div class="ai-ind" id="ind-gaze"><span class="d"></span>Gaze</div>
+      </div>
+    </div>
+
+    <!-- Controls -->
+    <div id="controls">
+      <button id="muteBtn"       data-tip="Mute"><i class="fa-solid fa-microphone"></i></button>
+      <button id="videoBtn"      data-tip="Camera"><i class="fa-solid fa-video"></i></button>
+      <div class="ctrl-sep"></div>
+      <button id="screenBtn"     data-tip="Share Screen"><i class="fa-solid fa-desktop"></i></button>
+      <button id="raiseHandBtn"  data-tip="Raise Hand"><i class="fa-solid fa-hand-paper"></i></button>
+      <div class="ctrl-sep"></div>
+      <button id="leaveBtn"      data-tip="Leave"><i class="fa-solid fa-right-from-bracket"></i></button>
+    </div>
+
+  </div><!-- /sidebar -->
+
+</div><!-- /meetingContainer -->
+
+<!-- ════════════ AI DETECTION PANEL ════════════ -->
+<!-- Floating toggle button -->
+<button id="ai-panel-toggle" title="AI Detection Log">
+  <i class="fa-solid fa-shield-halved"></i>
+  <span class="ai-badge" id="ai-badge">0</span>
+</button>
+
+<!-- Sliding panel -->
+<div id="ai-panel">
+  <div class="ai-panel-head">
+    <div class="ai-panel-title">
+      <span class="f-dot"></span>
+      AI Detection Log
+    </div>
+    <button class="ai-panel-clear" id="ai-panel-clear">Clear</button>
+  </div>
+  <div id="ai-panel-log"></div>
+</div>
+
+<!-- Camera error -->
+<div id="overlay">
+  <div class="overlay-card">
+    <div class="overlay-icon"><i class="fa-solid fa-video-slash"></i></div>
+    <div class="overlay-title">Camera Required</div>
+    <div class="overlay-msg">Unable to access your camera and / or microphone.<br>Please allow permissions and refresh.</div>
+  </div>
+</div>
+
+<div id="debugStatus">Initializing…</div>
+
+
+<!-- ══════════════════════════════════════════════════════
+     ALL BACKEND SCRIPTS — 100% UNCHANGED
+     ══════════════════════════════════════════════════════ -->
+<script>
+const meetingId = "{{ meeting_id }}";
+const role      = "{{ role }}";
+const isHost    = role === 'host';
+</script>
+
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+<script src="{{ url_for('static', filename='js files/videochat.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js"></script>
+
+<script>
+/* ─────────────────────────────────────────
+   UI ENHANCEMENTS (no logic change)
+───────────────────────────────────────── */
+
+// Custom cursor
+(function(){
+  const c = document.getElementById('_cur');
+  const r = document.getElementById('_ring');
+  document.addEventListener('mousemove', e => {
+    c.style.left = r.style.left = e.clientX + 'px';
+    c.style.top  = r.style.top  = e.clientY + 'px';
+  });
+})();
+
+// Particle canvas
+(function(){
+  const cv = document.getElementById('bg-canvas');
+  const cx = cv.getContext('2d');
+  const rsz = () => { cv.width = window.innerWidth; cv.height = window.innerHeight; };
+  rsz(); window.addEventListener('resize', rsz);
+  class N {
+    constructor(){ this.r(); }
+    r(){
+      this.x=Math.random()*cv.width; this.y=Math.random()*cv.height;
+      this.vx=(Math.random()-.5)*.28; this.vy=(Math.random()-.5)*.28;
+      this.rad=Math.random()*1.8+.5; this.a=Math.random()*.4+.12;
+      this.ts=Math.random()*.014+.004; this.td=Math.random()>.5?1:-1; this.ba=this.a;
+    }
+    u(){
+      this.x+=this.vx; this.y+=this.vy;
+      if(this.x<0||this.x>cv.width)this.vx*=-1;
+      if(this.y<0||this.y>cv.height)this.vy*=-1;
+      this.a+=this.ts*this.td;
+      if(this.a>this.ba+.14||this.a<this.ba-.1)this.td*=-1;
+    }
+    d(){
+      const g=cx.createRadialGradient(this.x,this.y,0,this.x,this.y,this.rad*3);
+      g.addColorStop(0,`rgba(201,168,76,${this.a})`);
+      g.addColorStop(.5,`rgba(201,168,76,${this.a*.28})`);
+      g.addColorStop(1,'rgba(201,168,76,0)');
+      cx.beginPath();cx.arc(this.x,this.y,this.rad*3,0,Math.PI*2);
+      cx.fillStyle=g;cx.fill();
+      cx.beginPath();cx.arc(this.x,this.y,this.rad,0,Math.PI*2);
+      cx.fillStyle=`rgba(232,200,112,${Math.min(this.a+.12,1)})`;cx.fill();
+    }
+  }
+  const ns = Array.from({length:55},()=>new N());
+  (function loop(){
+    cx.clearRect(0,0,cv.width,cv.height);
+    ns.forEach(n=>{n.u();n.d();});
+    for(let i=0;i<ns.length;i++) for(let j=i+1;j<ns.length;j++){
+      const dx=ns[i].x-ns[j].x,dy=ns[i].y-ns[j].y,d=Math.sqrt(dx*dx+dy*dy);
+      if(d<105){
+        cx.beginPath();cx.moveTo(ns[i].x,ns[i].y);cx.lineTo(ns[j].x,ns[j].y);
+        cx.strokeStyle=`rgba(201,168,76,${.11*(1-d/105)})`;cx.lineWidth=.5;cx.stroke();
+      }
+    }
+    requestAnimationFrame(loop);
+  })();
+})();
+
+/* ─────────────────────────────────────────
+   AI INDICATOR helper (sidebar strip)
+───────────────────────────────────────── */
+function updateAIIndicator(feature, statusText){
+  const map = {
+    deepfake:'ind-deepfake', liveness:'ind-liveness',
+    multiperson:'ind-multiperson', gaze:'ind-gaze',
+    bias:'ind-deepfake', audio_clarity:'ind-liveness', face_match:'ind-multiperson'
+  };
+  const el = document.getElementById(map[feature]||'ind-deepfake');
+  if(!el) return;
+  el.classList.remove('ok','warn','err');
+  const s = statusText.toLowerCase();
+  if(s.includes('❌')||s.includes('error')||s.includes('fake')||s.includes('multiple')||s.includes('not match'))
+    el.classList.add('err');
+  else if(s.includes('⚠️')||s.includes('possible')||s.includes('warn'))
+    el.classList.add('warn');
+  else
+    el.classList.add('ok');
+}
+
+/* ═══════════════════════════════════════════════════════
+   ORIGINAL DRAGGABLE LOCAL VIDEO — UNCHANGED
+═══════════════════════════════════════════════════════ */
+const localContainer = document.getElementById("localContainer");
+let isDragging = false;
+let offsetX, offsetY;
+
+localContainer.addEventListener("mousedown", (e) => {
+    isDragging = true;
+    offsetX = e.clientX - localContainer.offsetLeft;
+    offsetY = e.clientY - localContainer.offsetTop;
+    localContainer.style.transition = "none";
+});
+
+document.addEventListener("mousemove", (e) => {
+    if (isDragging) {
+        const x = e.clientX - offsetX;
+        const y = e.clientY - offsetY;
+        const maxX = window.innerWidth - localContainer.offsetWidth;
+        const maxY = window.innerHeight - localContainer.offsetHeight;
+        const clampedX = Math.max(0, Math.min(x, maxX));
+        const clampedY = Math.max(0, Math.min(y, maxY));
+        localContainer.style.left = clampedX + "px";
+        localContainer.style.top  = clampedY + "px";
+        localContainer.style.position = "fixed";
+    }
+});
+
+document.addEventListener("mouseup", () => {
+    isDragging = false;
+    localContainer.style.transition = "all 0.2s ease";
+});
+
+console.log('🚀 Main script loaded');
+
+function updateDebugStatus(msg) {
+    const debug = document.getElementById('debugStatus');
+    if (debug) debug.textContent = msg;
+    console.log('📊', msg);
+}
+
+window.showCameraError = () => {
+    document.getElementById('overlay').style.display = 'flex';
+};
+
+// Tabs
+document.querySelectorAll('.tabBtn').forEach(btn => {
+    btn.onclick = () => {
+        document.querySelectorAll('.tabBtn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tabContent').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(btn.dataset.tab).classList.add('active');
+    }
+});
+
+// Copy Link
+document.getElementById('inviteBtn').onclick = () => {
+    navigator.clipboard.writeText(window.location.href);
+    alert('Meeting link copied!');
+};
+
+/* ═══════════════════════════════════════════════════════
+   AI DETECTION PANEL — replaces flooding toasts
+   All external logic (showAINotification signature) is
+   preserved so nothing in other scripts breaks.
+═══════════════════════════════════════════════════════ */
+(function initAIPanel() {
+  const toggle  = document.getElementById('ai-panel-toggle');
+  const panel   = document.getElementById('ai-panel');
+  const log     = document.getElementById('ai-panel-log');
+  const badge   = document.getElementById('ai-badge');
+  const clearBtn= document.getElementById('ai-panel-clear');
+
+  let unread = 0;
+  let isOpen = false;
+
+  // Toggle open/close
+  toggle.addEventListener('click', () => {
+    isOpen = !isOpen;
+    panel.classList.toggle('open', isOpen);
+    if (isOpen) {
+      // reset badge when opened
+      unread = 0;
+      badge.textContent = '0';
+      badge.classList.remove('visible');
+    }
+  });
+
+  // Close panel when clicking outside
+  document.addEventListener('click', (e) => {
+    if (isOpen && !panel.contains(e.target) && e.target !== toggle && !toggle.contains(e.target)) {
+      isOpen = false;
+      panel.classList.remove('open');
+    }
+  });
+
+  // Clear log
+  clearBtn.addEventListener('click', () => {
+    log.innerHTML = '';
+    unread = 0;
+    badge.textContent = '0';
+    badge.classList.remove('visible');
+  });
+
+  // Expose addAILogEntry for use by showAINotification below
+  window._addAILogEntry = function(feature, status, source) {
+    const featureNames = {
+      'deepfake':      'Deepfake Detection',
+      'liveness':      'Liveness Check',
+      'multiperson':   'Multi-Person Detection',
+      'gaze':          'Gaze Tracking',
+      'bias':          'Bias Detection',
+      'audio_clarity': 'Audio Clarity',
+      'face_match':    'Face Matching',
+      'hand_raise':    'Hand Raised'
+    };
+    const featureIcons = {
+      'deepfake':      'fa-shield-halved',
+      'liveness':      'fa-eye',
+      'multiperson':   'fa-users',
+      'gaze':          'fa-crosshairs',
+      'bias':          'fa-scale-balanced',
+      'audio_clarity': 'fa-wave-square',
+      'face_match':    'fa-id-card',
+      'hand_raise':    'fa-hand'
+    };
+
+    const s = status.toLowerCase();
+    let cls = 'ok';
+    if (s.includes('❌') || s.includes('error') || s.includes('fake') || s.includes('multiple') || s.includes('not match')) cls = 'err';
+    else if (s.includes('⚠️') || s.includes('possible') || s.includes('warn') || s.includes('poor')) cls = 'warn';
+
+    const name = featureNames[feature] || feature;
+    const icon = featureIcons[feature] || 'fa-robot';
+    const time = new Date().toLocaleTimeString();
+
+    const item = document.createElement('div');
+    item.className = `ai-log-item ${cls}`;
+    item.innerHTML = `
+      <div class="ai-log-icon"><i class="fa-solid ${icon}"></i></div>
+      <div class="ai-log-body">
+        <div class="ai-log-name">${name}</div>
+        <div class="ai-log-status">${status}</div>
+        ${source ? `<div class="ai-log-time">${time} · ${source}</div>` : `<div class="ai-log-time">${time}</div>`}
+      </div>`;
+
+    // Prepend so newest is at top
+    log.insertBefore(item, log.firstChild);
+
+    // Cap log at 60 entries to keep it light
+    while (log.children.length > 60) log.removeChild(log.lastChild);
+
+    // Update badge if panel is closed
+    if (!isOpen) {
+      unread++;
+      badge.textContent = unread > 99 ? '99+' : unread;
+      badge.classList.add('visible');
+    }
+  };
+})();
+
+/* Public API — keeps same signature so existing socket listener works */
+function showAINotification(feature, status, source) {
+    console.log(`🔔 AI Update: ${feature} = ${status}`);
+    updateAIIndicator(feature, status);
+    window._addAILogEntry(feature, status, source);
+}
+
+/* ═══════════════════════════════════════════════════════
+   START INTERVIEW — UNCHANGED
+═══════════════════════════════════════════════════════ */
+fetch(`/start_interview/${meetingId}`, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'}
+})
+.then(r => r.json())
+.then(data => {
+    console.log('✅ Interview started:', data);
+    updateDebugStatus('AI Detection Started');
+})
+.catch(err => console.error('❌ Failed to start interview:', err));
+
+// Listen for AI updates and log to panel
+if (typeof socket !== 'undefined') {
+    socket.on('ai_status_update', (data) => {
+        console.log('🔔 AI Update received:', data);
+        updateDebugStatus(`AI: ${data.feature} - ${data.status}`);
+        showAINotification(data.feature, data.status, data.source);
+    });
+}
+
+/* ═══════════════════════════════════════════════════════
+   FRAME CAPTURE — UNCHANGED
+═══════════════════════════════════════════════════════ */
+setTimeout(function() {
+    console.log('🎥 Starting frame capture initialization...');
+    updateDebugStatus('Initializing frame capture...');
+
+    const localVideo = document.getElementById('localVideo');
+    if (!localVideo) {
+        console.error('❌ localVideo element not found!');
+        updateDebugStatus('ERROR: Video element not found');
+        return;
+    }
+
+    let frameCount = 0;
+    let captureStarted = false;
+
+    function tryStartCapture() {
+        console.log('Checking video readiness...');
+        console.log('- readyState:', localVideo.readyState);
+        console.log('- videoWidth:', localVideo.videoWidth);
+        console.log('- videoHeight:', localVideo.videoHeight);
+
+        if (localVideo.videoWidth > 0 && localVideo.videoHeight > 0 && !captureStarted) {
+            console.log('✅ Video is ready! Starting frame capture...');
+            updateDebugStatus('Frame capture active');
+            captureStarted = true;
+
+            setInterval(function() {
+                try {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 640;
+                    canvas.height = 480;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(localVideo, 0, 0, canvas.width, canvas.height);
+                    const frame_base64 = canvas.toDataURL('image/jpeg', 0.8);
+
+                    if (typeof socket !== 'undefined') {
+                        socket.emit('candidate_frame', { frame_base64: frame_base64 });
+                        frameCount++;
+                        if (frameCount % 20 === 0) {
+                            console.log(`📸 Sent ${frameCount} frames`);
+                            updateDebugStatus(`Frames sent: ${frameCount}`);
+                        }
+                    } else {
+                        console.error('❌ Socket not available');
+                        updateDebugStatus('ERROR: Socket unavailable');
+                    }
+                } catch(err) {
+                    console.error('Frame capture error:', err);
+                }
+            }, 500);
+        } else {
+            console.log('⏳ Video not ready yet, retrying in 500ms...');
+            updateDebugStatus('Waiting for video...');
+            setTimeout(tryStartCapture, 500);
+        }
+    }
+
+    tryStartCapture();
+
+}, 3000);
+
+/* ═══════════════════════════════════════════════════════
+   AUDIO CAPTURE — UNCHANGED
+═══════════════════════════════════════════════════════ */
+setTimeout(function() {
+    console.log('🎤 Starting audio capture...');
+
+    let audioContext;
+    let mediaRecorder;
+    let audioChunks = [];
+
+    navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(stream => {
+            console.log('✅ Audio stream obtained');
+
+            mediaRecorder = new MediaRecorder(stream);
+
+            mediaRecorder.ondataavailable = (event) => {
+                if (event.data.size > 0) {
+                    audioChunks.push(event.data);
+                }
+            };
+
+            mediaRecorder.onstop = () => {
+                const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                audioChunks = [];
+
+                const formData = new FormData();
+                formData.append('audio', audioBlob, 'audio.wav');
+                formData.append('meeting_id', meetingId);
+
+                fetch('/analyze_audio', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(r => r.json())
+                .then(data => {
+                    console.log('🎤 Audio analysis result:', data);
+                    updateDebugStatus('Audio analyzed');
+                })
+                .catch(err => console.error('Audio analysis error:', err));
+            };
+
+            setInterval(() => {
+                if (mediaRecorder.state === 'inactive') {
+                    mediaRecorder.start();
+                    console.log('🎤 Recording audio...');
+                    setTimeout(() => {
+                        if (mediaRecorder.state === 'recording') {
+                            mediaRecorder.stop();
+                            console.log('🎤 Audio sent for analysis');
+                        }
+                    }, 5000);
+                }
+            }, 10000);
+        })
+        .catch(err => {
+            console.error('❌ Audio access denied:', err);
+            updateDebugStatus('Audio access denied');
+        });
+}, 4000);
+
+/* ═══════════════════════════════════════════════════════
+   GAZE TRACKING WITH MEDIAPIPE — UNCHANGED
+═══════════════════════════════════════════════════════ */
+setTimeout(function() {
+    console.log('👁️ Starting gaze tracking initialization...');
+    updateDebugStatus('Initializing gaze tracking...');
+
+    const localVideo = document.getElementById('localVideo');
+    if (!localVideo) {
+        console.error('❌ localVideo element not found for gaze tracking!');
+        return;
+    }
+
+    const faceMesh = new FaceMesh({
+        locateFile: (file) => {
+            return `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`;
+        }
+    });
+
+    faceMesh.setOptions({
+        maxNumFaces: 1,
+        refineLandmarks: true,
+        minDetectionConfidence: 0.5,
+        minTrackingConfidence: 0.5
+    });
+
+    let gazeEventCount = 0;
+    let lastDirection  = '';
+    let lastEmitTime   = 0;
+    const EMIT_INTERVAL = 300;
+
+    faceMesh.onResults((results) => {
+        if (!results.multiFaceLandmarks || results.multiFaceLandmarks.length === 0) {
+            const now = Date.now();
+            if (now - lastEmitTime >= EMIT_INTERVAL) {
+                emitGazeEvent('away');
+                lastEmitTime = now;
+            }
+            return;
+        }
+
+        const landmarks    = results.multiFaceLandmarks[0];
+        const leftEye      = landmarks[159];
+        const rightEye     = landmarks[386];
+        const noseTip      = landmarks[1];
+        const leftMouth    = landmarks[61];
+        const rightMouth   = landmarks[291];
+
+        const eyeCenterX   = (leftEye.x + rightEye.x) / 2;
+        const eyeCenterY   = (leftEye.y + rightEye.y) / 2;
+        const faceCenterX  = (noseTip.x + ((leftMouth.x + rightMouth.x) / 2)) / 2;
+        const faceCenterY  = (noseTip.y + ((leftMouth.y + rightMouth.y) / 2)) / 2;
+
+        const horizontalDiff = eyeCenterX - faceCenterX;
+        const verticalDiff   = eyeCenterY - faceCenterY;
+
+        let direction = 'Center';
+        const HORIZONTAL_THRESHOLD = 0.02;
+        const VERTICAL_THRESHOLD   = 0.02;
+
+        if (Math.abs(horizontalDiff) < HORIZONTAL_THRESHOLD && Math.abs(verticalDiff) < VERTICAL_THRESHOLD) {
+            direction = 'Center';
+        } else if (Math.abs(horizontalDiff) > Math.abs(verticalDiff)) {
+            direction = horizontalDiff > 0 ? 'Right' : 'Left';
+        } else {
+            direction = verticalDiff > 0 ? 'Bottom' : 'Top';
+        }
+
+        const now = Date.now();
+        if (now - lastEmitTime >= EMIT_INTERVAL) {
+            emitGazeEvent(direction);
+            lastEmitTime = now;
+        }
+    });
+
+    function emitGazeEvent(direction) {
+        if (typeof socket === 'undefined') {
+            console.error('❌ Socket not available for gaze tracking');
+            return;
+        }
+        const timestamp = new Date().toISOString();
+        socket.emit('gaze-event', {
+            socketId:  socket.id,
+            meetingId: meetingId,
+            direction: direction,
+            timestamp: timestamp
+        });
+        gazeEventCount++;
+        if (gazeEventCount % 20 === 0) {
+            console.log(`👁️ Sent ${gazeEventCount} gaze events | Last: ${direction}`);
+            updateDebugStatus(`Gaze tracking: ${gazeEventCount} events`);
+        }
+        lastDirection = direction;
+    }
+
+    const camera = new Camera(localVideo, {
+        onFrame: async () => {
+            try {
+                await faceMesh.send({ image: localVideo });
+            } catch (err) {
+                console.error('Gaze tracking error:', err);
+            }
+        },
+        width: 640, height: 480
+    });
+
+    function startGazeTracking() {
+        if (localVideo.videoWidth > 0 && localVideo.videoHeight > 0) {
+            console.log('✅ Starting gaze tracking camera...');
+            camera.start();
+            updateDebugStatus('Gaze tracking active');
+        } else {
+            console.log('⏳ Waiting for video for gaze tracking...');
+            setTimeout(startGazeTracking, 500);
+        }
+    }
+
+    startGazeTracking();
+
+}, 4000);
+
+/* ═══════════════════════════════════════════════════════
+   LEAVE BUTTON — notify server to stop AI pipeline first
+   (overrides the basic redirect in videochat.js)
+═══════════════════════════════════════════════════════ */
+(function patchLeaveBtn() {
+  // Wait until after videochat.js has set its own onclick
+  const btn = document.getElementById('leaveBtn');
+  if (!btn) return;
+  btn.onclick = function() {
+    // Tell server to stop AI pipeline for this meeting
+    fetch(`/leave_meeting/${meetingId}`, { method: 'POST' })
+      .catch(() => {}) // best-effort; don't block navigation
+      .finally(() => {
+        location.href = '/clientportal';
+      });
+  };
+})();
+
+/* ─────────────────────────────────────────
+   CHAT BUBBLE STYLING INTERCEPTOR
+   videochat.js calls addMessage("Me: ...") or addMessage("Peer: ...")
+   We override it AFTER videochat.js loads to tag divs with correct class
+   so our CSS can align them left/right and colour them correctly.
+───────────────────────────────────────── */
+(function patchChat() {
+  const messagesDiv = document.getElementById('messages');
+  if (!messagesDiv) return;
+
+  // Use a MutationObserver so we catch every div videochat.js appends
+  const observer = new MutationObserver(mutations => {
+    mutations.forEach(m => {
+      m.addedNodes.forEach(node => {
+        if (node.nodeType !== 1 || node.tagName !== 'DIV') return;
+        if (node.style && node.style.color) return; // raise-hand notification — leave as-is
+
+        const text = node.innerText || node.textContent || '';
+
+        // Format: "HH:MM:SS AM/PM - Me: message"  or  "HH:MM:SS AM/PM - Peer: message"
+        if (text.includes('- Me:')) {
+          node.classList.add('msg-me');
+          // Pull out time + content and reformat
+          const parts = text.split('- Me:');
+          const time  = parts[0].trim();
+          const body  = parts.slice(1).join('- Me:').trim();
+          node.innerHTML = `<span style="font-size:.58rem;color:var(--gold);font-weight:700;letter-spacing:.06em;display:block;margin-bottom:2px;text-transform:uppercase">You</span>${body}<span style="font-size:.55rem;color:var(--muted);display:block;margin-top:3px">${time}</span>`;
+        } else if (text.includes('- Peer:')) {
+          node.classList.add('msg-peer');
+          const parts = text.split('- Peer:');
+          const time  = parts[0].trim();
+          const body  = parts.slice(1).join('- Peer:').trim();
+          node.innerHTML = `<span style="font-size:.58rem;color:var(--muted);font-weight:700;letter-spacing:.06em;display:block;margin-bottom:2px;text-transform:uppercase">Peer</span>${body}<span style="font-size:.55rem;color:var(--muted);display:block;margin-top:3px">${time}</span>`;
+        }
+      });
+    });
+  });
+
+  observer.observe(messagesDiv, { childList: true });
+})();
+
+</script>
+
+</body>
+</html>

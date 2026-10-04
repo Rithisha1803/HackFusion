@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit Profile | AuthentiHire</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --ink:        #07080a;
+      --bone:       #f0ebe0;
+      --gold:       #c9a84c;
+      --gold-light: #e8c870;
+      --charcoal:   #141618;
+      --surface:    #111214;
+      --mid:        #2e3138;
+      --muted:      #6c6f7b;
+      --border:     rgba(255,255,255,0.07);
+      --success:    #10b981;
+      --danger:     #ef4444;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--ink);
+      color: var(--bone);
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+
+    /* ── LIGHT MODE ── */
+    body.light-mode {
+      --ink:      #f0ebe0;
+      --bone:     #07080a;
+      --charcoal: #e4dfd3;
+      --surface:  #ece7db;
+      --mid:      #b0aa9e;
+      --muted:    #5c5750;
+      --border:   rgba(0,0,0,0.1);
+    }
+
+    /* ── CURSOR ── */
+    .cursor      { width:8px;height:8px;background:var(--gold);border-radius:50%;position:fixed;top:0;left:0;pointer-events:none;z-index:9999;transform:translate(-50%,-50%); }
+    .cursor-ring { width:34px;height:34px;border:1px solid rgba(201,168,76,0.45);border-radius:50%;position:fixed;top:0;left:0;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:width .3s,height .3s,border-color .3s,top .07s,left .07s; }
+    body:has(a:hover) .cursor-ring, body:has(button:hover) .cursor-ring { width:52px;height:52px;border-color:var(--gold); }
+
+    /* ── BACKGROUND ── */
+    #hero-canvas {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      opacity: 0.4;
+    }
+    .hero-grain {
+      position: fixed; inset: 0; z-index: 1; opacity: 0.025; pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 180px;
+    }
+
+    /* ── NAVBAR ── */
+    .navbar {
+      position: sticky; top: 0; width: 100%;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1.4rem 6%;
+      z-index: 1000;
+      background: rgba(7,8,10,0.7);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      transition: padding 0.4s;
+    }
+    body.light-mode .navbar { background: rgba(240,235,224,0.85); }
+    .navbar.scrolled { padding: 1rem 6%; }
+
+    .logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 700; font-size: 1.6rem;
+      letter-spacing: 0.01em; color: var(--bone); line-height: 1;
+      cursor: pointer; text-decoration: none;
+    }
+    .logo span { color: var(--gold); font-style: italic; }
+
+    .nav-links { display: flex; list-style: none; gap: 2.5rem; }
+    .nav-links a {
+      text-decoration: none; color: var(--muted);
+      font-size: 0.8rem; font-weight: 500;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover, .nav-links a.active { color: var(--bone); }
+    .nav-links a.active { color: var(--gold); }
+
+    .toggle-btn {
+      background: transparent;
+      border: 1px solid var(--border); color: var(--muted);
+      padding: 0.45rem 1.1rem; border-radius: 100px;
+      font-family: 'Outfit', sans-serif; font-size: 0.75rem;
+      font-weight: 500; letter-spacing: 0.06em;
+      cursor: pointer; transition: border-color 0.2s, color 0.2s;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .toggle-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+    /* ── MAIN ── */
+    .container {
+      position: relative; z-index: 2;
+      max-width: 760px; margin: 0 auto;
+      padding: 4rem 6%;
+    }
+
+    /* ── PAGE HEADER ── */
+    .page-header {
+      text-align: center; margin-bottom: 3rem;
+      opacity: 0; animation: fadeUp 0.8s cubic-bezier(0.22,1,0.36,1) 0.1s forwards;
+    }
+    .page-eyebrow {
+      display: block; font-size: 0.7rem; font-weight: 600;
+      color: var(--gold); letter-spacing: 0.2em; text-transform: uppercase;
+      margin-bottom: 0.8rem;
+    }
+    .page-header h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2.4rem, 4vw, 3.2rem);
+      font-weight: 700; line-height: 1.05;
+      letter-spacing: -0.01em; color: var(--bone);
+    }
+    .page-header h1 em { font-style: italic; color: var(--gold); }
+    .page-header p { font-size: 0.9rem; color: var(--muted); margin-top: 0.6rem; font-weight: 300; }
+
+    /* ── SUCCESS MESSAGE ── */
+    .success-message {
+      background: rgba(16,185,129,0.06);
+      border: 1px solid rgba(16,185,129,0.2);
+      border-left: 2px solid var(--success);
+      border-radius: 12px; padding: 1rem 1.4rem;
+      margin-bottom: 2rem;
+      display: none; align-items: center; gap: 1rem;
+      animation: slideIn 0.3s ease;
+    }
+    .success-message.show { display: flex; }
+    .success-message i { font-size: 1.3rem; color: var(--success); }
+    .success-message h4 { color: var(--success); font-size: 0.9rem; font-weight: 600; margin-bottom: 0.2rem; }
+    .success-message p { color: var(--muted); font-size: 0.82rem; margin: 0; }
+
+    /* ── FORM CARD ── */
+    .form-card {
+      background: var(--charcoal);
+      border: 1px solid var(--border);
+      border-radius: 20px; padding: 3rem;
+      position: relative; overflow: hidden;
+      opacity: 0; animation: fadeUp 0.8s cubic-bezier(0.22,1,0.36,1) 0.2s forwards;
+      transition: border-color 0.3s;
+    }
+    .form-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      transform: scaleX(0); transition: transform 0.5s ease;
+    }
+    .form-card:hover::before { transform: scaleX(1); }
+    .form-card::after {
+      content: ''; position: absolute;
+      width: 300px; height: 300px;
+      background: radial-gradient(circle, rgba(201,168,76,0.06) 0%, transparent 70%);
+      top: -80px; right: -80px; border-radius: 50%; pointer-events: none;
+    }
+
+    .form-card-header {
+      display: flex; align-items: center; gap: 1.2rem;
+      margin-bottom: 2rem; padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .form-card-icon {
+      width: 44px; height: 44px; border-radius: 12px;
+      background: rgba(201,168,76,0.08);
+      border: 1px solid rgba(201,168,76,0.18);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .form-card-icon i { color: var(--gold); font-size: 1.1rem; }
+    .form-card-header h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.5rem; font-weight: 700; color: var(--bone);
+    }
+    .form-card-header p { font-size: 0.8rem; color: var(--muted); font-weight: 300; margin-top: 0.2rem; }
+
+    /* ── INFO BOX ── */
+    .info-box {
+      background: rgba(201,168,76,0.05);
+      border: 1px solid rgba(201,168,76,0.12);
+      border-left: 2px solid rgba(201,168,76,0.5);
+      padding: 1.1rem 1.2rem; border-radius: 10px;
+      margin-bottom: 2rem;
+      display: flex; align-items: flex-start; gap: 1rem;
+    }
+    .info-box i { font-size: 1rem; color: var(--gold); margin-top: 0.15rem; }
+    .info-box h4 { color: var(--gold-light); font-size: 0.85rem; font-weight: 600; margin-bottom: 0.3rem; }
+    .info-box p { color: var(--muted); font-size: 0.8rem; font-weight: 300; line-height: 1.6; }
+
+    /* ── FORM ELEMENTS ── */
+    .form-group { margin-bottom: 1.8rem; position: relative; }
+    .form-group label {
+      display: flex; align-items: center; gap: 0.5rem;
+      color: var(--bone); font-weight: 500; margin-bottom: 0.7rem;
+      font-size: 0.82rem; letter-spacing: 0.05em; text-transform: uppercase;
+    }
+    .form-group label i { color: var(--gold); font-size: 0.85rem; }
+
+    .form-group input {
+      width: 100%; padding: 0.9rem 1.1rem;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: 10px; color: var(--bone);
+      font-family: 'Outfit', sans-serif; font-size: 0.95rem; font-weight: 300;
+      transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+      outline: none;
+    }
+    .form-group input::placeholder { color: var(--muted); }
+    .form-group input:focus {
+      border-color: rgba(201,168,76,0.5);
+      background: rgba(201,168,76,0.04);
+      box-shadow: 0 0 0 3px rgba(201,168,76,0.08);
+    }
+    .form-group input.valid   { border-color: rgba(16,185,129,0.5); }
+    .form-group input.invalid { border-color: rgba(239,68,68,0.5); }
+
+    body.light-mode .form-group input {
+      background: rgba(0,0,0,0.04);
+      color: var(--bone);
+    }
+    body.light-mode .form-group input:focus { background: rgba(201,168,76,0.06); }
+
+    .input-hint {
+      display: flex; align-items: center; gap: 0.5rem;
+      margin-top: 0.5rem; color: var(--muted); font-size: 0.78rem; font-weight: 300;
+    }
+    .input-hint i { font-size: 0.75rem; color: var(--gold); opacity: 0.7; }
+
+    /* ── ACTIONS ── */
+    .form-actions { display: flex; gap: 1rem; margin-top: 2.5rem; }
+    .btn {
+      flex: 1; padding: 0.95rem 1.5rem; border: none; border-radius: 8px;
+      font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 0.88rem;
+      letter-spacing: 0.04em; cursor: pointer; transition: all 0.3s;
+      display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+      text-decoration: none;
+    }
+    .btn-primary {
+      background: var(--gold); color: var(--ink);
+      box-shadow: 0 4px 20px rgba(201,168,76,0.25);
+    }
+    .btn-primary:hover {
+      background: var(--gold-light); transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(201,168,76,0.35);
+    }
+    .btn-primary:active { transform: translateY(0); }
+    .btn-outline {
+      background: transparent; color: var(--bone);
+      border: 1px solid var(--border);
+    }
+    .btn-outline:hover { border-color: var(--gold); color: var(--gold); transform: translateY(-2px); }
+
+    .btn-loading { opacity: 0.65; pointer-events: none; position: relative; }
+    .btn-loading::after {
+      content: ''; position: absolute;
+      width: 14px; height: 14px; top: 50%; left: 50%;
+      margin: -7px 0 0 -7px;
+      border: 2px solid transparent;
+      border-top-color: var(--ink);
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity:0; transform:translateY(24px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+    @keyframes slideIn {
+      from { opacity:0; transform:translateX(-16px); }
+      to   { opacity:1; transform:translateX(0); }
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      .navbar { flex-direction: column; gap: 1rem; padding: 1rem 4%; }
+      .nav-links { gap: 1.5rem; flex-wrap: wrap; justify-content: center; }
+      .form-card { padding: 2rem 1.5rem; }
+      .form-actions { flex-direction: column; }
+    }
+    @media (max-width: 640px) {
+      .nav-links { display: none; }
+      .container { padding: 3rem 1.2rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-ring" id="cursor-ring"></div>
+
+  <canvas id="hero-canvas"></canvas>
+  <div class="hero-grain"></div>
+
+  <!-- NAVBAR -->
+  <nav class="navbar" id="navbar">
+    <a class="logo" href="{{ url_for('home') }}">Authenti<span>Hire</span></a>
+    <ul class="nav-links">
+      <li><a href="{{ url_for('home') }}">Home</a></li>
+      <li><a href="{{ url_for('about') }}">About</a></li>
+      <li><a href="{{ url_for('contact') }}">Contact</a></li>
+      <li><a href="{{ url_for('profile') }}" class="active">Profile</a></li>
+    </ul>
+    <button class="toggle-btn" onclick="toggleMode()" aria-label="Toggle Theme">
+      <i class="fas fa-moon"></i> <span id="themeText">Dark Mode</span>
+    </button>
+  </nav>
+
+  <!-- MAIN -->
+  <div class="container">
+
+    <!-- Page Header -->
+    <div class="page-header">
+      <span class="page-eyebrow">Account Settings</span>
+      <h1>Edit Your <em>Profile</em></h1>
+      <p>Update your account information and preferences</p>
+    </div>
+
+    <!-- Success Message -->
+    <div class="success-message" id="successMessage">
+      <i class="fas fa-check-circle"></i>
+      <div>
+        <h4>Profile Updated Successfully!</h4>
+        <p>Your changes have been saved.</p>
+      </div>
+    </div>
+
+    <!-- Form Card -->
+    <div class="form-card">
+      <div class="form-card-header">
+        <div class="form-card-icon">
+          <i class="fas fa-user-edit"></i>
+        </div>
+        <div>
+          <h2>Account Information</h2>
+          <p>Your details as seen by interviewers</p>
+        </div>
+      </div>
+
+      <div class="info-box">
+        <i class="fas fa-info-circle"></i>
+        <div>
+          <h4>Keep your details current</h4>
+          <p>Changes will be reflected across all your interviews and meetings on the platform.</p>
+        </div>
+      </div>
+
+      <form method="POST" action="{{ url_for('edit_profile') }}" id="editForm">
+
+        <div class="form-group">
+          <label for="name">
+            <i class="fas fa-user"></i> Full Name
+          </label>
+          <input
+            type="text" id="name" name="name"
+            value="{{ user.name }}"
+            placeholder="Enter your full name"
+            required minlength="2"
+          >
+          <div class="input-hint">
+            <i class="fas fa-lightbulb"></i>
+            Your name as it will appear in interviews
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="email">
+            <i class="fas fa-envelope"></i> Email Address
+          </label>
+          <input
+            type="email" id="email" name="email"
+            value="{{ user.email }}"
+            placeholder="your.email@example.com"
+            required
+          >
+          <div class="input-hint">
+            <i class="fas fa-lightbulb"></i>
+            We'll send meeting invitations to this email
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary" id="saveBtn">
+            <i class="fas fa-save"></i>
+            <span>Save Changes</span>
+          </button>
+          <a href="{{ url_for('profile') }}" class="btn btn-outline">
+            <i class="fas fa-times"></i>
+            Cancel
+          </a>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <script>
+    /* ── CURSOR ── */
+    const cursor = document.getElementById('cursor');
+    const ring   = document.getElementById('cursor-ring');
+    document.addEventListener('mousemove', e => {
+      cursor.style.left = e.clientX + 'px';
+      cursor.style.top  = e.clientY + 'px';
+      ring.style.left   = e.clientX + 'px';
+      ring.style.top    = e.clientY + 'px';
+    });
+
+    /* ── CANVAS BACKGROUND ── */
+    const canvas = document.getElementById('hero-canvas');
+    const ctx    = canvas.getContext('2d');
+    function resizeCanvas() {
+      canvas.width  = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    class Node {
+      constructor() { this.reset(); }
+      reset() {
+        this.x  = Math.random() * canvas.width;
+        this.y  = Math.random() * canvas.height;
+        this.vx = (Math.random() - 0.5) * 0.25;
+        this.vy = (Math.random() - 0.5) * 0.25;
+        this.r  = Math.random() * 1.5 + 0.5;
+        this.a  = Math.random() * 0.4 + 0.1;
+      }
+      update() {
+        this.x += this.vx; this.y += this.vy;
+        if (this.x < 0 || this.x > canvas.width)  this.vx *= -1;
+        if (this.y < 0 || this.y > canvas.height)  this.vy *= -1;
+      }
+      draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(201,168,76,${this.a})`;
+        ctx.fill();
+      }
+    }
+    const nodes = Array.from({ length: 50 }, () => new Node());
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      nodes.forEach(n => { n.update(); n.draw(); });
+      for (let i = 0; i < nodes.length; i++) {
+        for (let j = i + 1; j < nodes.length; j++) {
+          const dx = nodes[i].x - nodes[j].x;
+          const dy = nodes[i].y - nodes[j].y;
+          const d  = Math.sqrt(dx * dx + dy * dy);
+          if (d < 100) {
+            ctx.beginPath();
+            ctx.moveTo(nodes[i].x, nodes[i].y);
+            ctx.lineTo(nodes[j].x, nodes[j].y);
+            ctx.strokeStyle = `rgba(201,168,76,${0.07 * (1 - d / 100)})`;
+            ctx.lineWidth = 0.5;
+            ctx.stroke();
+          }
+        }
+      }
+      requestAnimationFrame(animate);
+    }
+    animate();
+
+    /* ── NAVBAR SHRINK ── */
+    window.addEventListener('scroll', () => {
+      document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 60);
+    });
+
+    /* ── THEME TOGGLE ── */
+    function toggleMode() {
+      const isLight = !document.body.classList.contains('light-mode');
+      document.body.classList.toggle('light-mode');
+      const icon = document.querySelector('.toggle-btn i');
+      const text = document.getElementById('themeText');
+      if (isLight) {
+        icon.className = 'fas fa-sun';
+        text.textContent = 'Light Mode';
+        localStorage.setItem('theme', 'light');
+      } else {
+        icon.className = 'fas fa-moon';
+        text.textContent = 'Dark Mode';
+        localStorage.setItem('theme', 'dark');
+      }
+    }
+    window.addEventListener('load', () => {
+      if (localStorage.getItem('theme') === 'light') {
+        document.body.classList.add('light-mode');
+        document.querySelector('.toggle-btn i').className = 'fas fa-sun';
+        document.getElementById('themeText').textContent = 'Light Mode';
+      }
+    });
+
+    /* ── SUCCESS CHECK ── */
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('success') === 'true') {
+      const msg = document.getElementById('successMessage');
+      msg.classList.add('show');
+      setTimeout(() => msg.classList.remove('show'), 5000);
+    }
+
+    /* ── FORM SUBMIT LOADING STATE ── */
+    const form    = document.getElementById('editForm');
+    const saveBtn = document.getElementById('saveBtn');
+    form.addEventListener('submit', function() {
+      saveBtn.classList.add('btn-loading');
+      saveBtn.querySelector('span').textContent = 'Saving…';
+    });
+
+    /* ── INPUT VALIDATION FEEDBACK ── */
+    const nameInput  = document.getElementById('name');
+    const emailInput = document.getElementById('email');
+
+    function validateInput(input) {
+      input.classList.toggle('valid',   input.validity.valid);
+      input.classList.toggle('invalid', !input.validity.valid);
+    }
+    function clearValidation(input) {
+      input.classList.remove('valid', 'invalid');
+    }
+
+    nameInput.addEventListener('blur',  () => validateInput(nameInput));
+    emailInput.addEventListener('blur', () => validateInput(emailInput));
+    nameInput.addEventListener('input',  () => clearValidation(nameInput));
+    emailInput.addEventListener('input', () => clearValidation(emailInput));
+  </script>
+</body>
+</html>

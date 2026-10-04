@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ user.name }}'s Profile | AuthentiHire</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --ink:        #07080a;
+      --bone:       #f0ebe0;
+      --gold:       #c9a84c;
+      --gold-light: #e8c870;
+      --charcoal:   #141618;
+      --surface:    #111214;
+      --mid:        #2e3138;
+      --muted:      #6c6f7b;
+      --border:     rgba(255,255,255,0.07);
+      --success:    #10b981;
+      --danger:     #ef4444;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--ink);
+      color: var(--bone);
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+
+    /* ── LIGHT MODE ── */
+    body.light-mode {
+      --ink:      #f0ebe0;
+      --bone:     #07080a;
+      --charcoal: #e4dfd3;
+      --surface:  #ece7db;
+      --mid:      #b0aa9e;
+      --muted:    #5c5750;
+      --border:   rgba(0,0,0,0.1);
+    }
+
+    /* ── CURSOR ── */
+    .cursor      { width:8px;height:8px;background:var(--gold);border-radius:50%;position:fixed;top:0;left:0;pointer-events:none;z-index:9999;transform:translate(-50%,-50%); }
+    .cursor-ring { width:34px;height:34px;border:1px solid rgba(201,168,76,0.45);border-radius:50%;position:fixed;top:0;left:0;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:width .3s,height .3s,border-color .3s,top .07s,left .07s; }
+    body:has(a:hover) .cursor-ring, body:has(button:hover) .cursor-ring { width:52px;height:52px;border-color:var(--gold); }
+
+    /* ── BACKGROUND ── */
+    #hero-canvas {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      opacity: 0.4;
+    }
+    .hero-grain {
+      position: fixed; inset: 0; z-index: 1; opacity: 0.025; pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 180px;
+    }
+
+    /* ── NAVBAR ── */
+    .navbar {
+      position: sticky; top: 0; width: 100%;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1.4rem 6%;
+      z-index: 1000;
+      background: rgba(7,8,10,0.7);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      transition: padding 0.4s;
+    }
+    body.light-mode .navbar { background: rgba(240,235,224,0.85); }
+    .navbar.scrolled { padding: 1rem 6%; }
+
+    .logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 700; font-size: 1.6rem;
+      letter-spacing: 0.01em; color: var(--bone); line-height: 1;
+      cursor: pointer; text-decoration: none;
+    }
+    .logo span { color: var(--gold); font-style: italic; }
+
+    .nav-links { display: flex; list-style: none; gap: 2.5rem; }
+    .nav-links a {
+      text-decoration: none; color: var(--muted);
+      font-size: 0.8rem; font-weight: 500;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover, .nav-links a.active { color: var(--bone); }
+    .nav-links a.active { color: var(--gold); }
+
+    .toggle-btn {
+      background: transparent;
+      border: 1px solid var(--border); color: var(--muted);
+      padding: 0.45rem 1.1rem; border-radius: 100px;
+      font-family: 'Outfit', sans-serif; font-size: 0.75rem;
+      font-weight: 500; letter-spacing: 0.06em;
+      cursor: pointer; transition: border-color 0.2s, color 0.2s;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .toggle-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+    /* ── MAIN ── */
+    .container {
+      position: relative; z-index: 2;
+      max-width: 1300px; margin: 0 auto;
+      padding: 4rem 6%;
+    }
+
+    /* ── PAGE HEADER ── */
+    .page-header {
+      margin-bottom: 3.5rem;
+      opacity: 0; animation: fadeUp 0.8s cubic-bezier(0.22,1,0.36,1) 0.1s forwards;
+    }
+    .page-eyebrow {
+      display: block; font-size: 0.7rem; font-weight: 600;
+      color: var(--gold); letter-spacing: 0.2em; text-transform: uppercase;
+      margin-bottom: 0.8rem;
+    }
+    .page-header h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2.4rem, 4vw, 3.5rem);
+      font-weight: 700; line-height: 1.05;
+      letter-spacing: -0.01em; color: var(--bone);
+    }
+    .page-header h1 em { font-style: italic; color: var(--gold); }
+    .page-header p { font-size: 0.9rem; color: var(--muted); margin-top: 0.6rem; font-weight: 300; }
+
+    /* ── STATS (candidates only) ── */
+    .stats-bar {
+      display: flex; gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border); border-radius: 16px; overflow: hidden;
+      margin-bottom: 3rem;
+      opacity: 0; animation: fadeUp 0.8s cubic-bezier(0.22,1,0.36,1) 0.2s forwards;
+    }
+    .stat-item {
+      flex: 1; text-align: center; padding: 2rem 1rem;
+      background: var(--charcoal);
+      transition: background 0.3s;
+    }
+    .stat-item:hover { background: #181a1e; }
+    .stat-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2.6rem; font-weight: 700;
+      color: var(--gold); line-height: 1; margin-bottom: 0.3rem;
+    }
+    .stat-label {
+      font-size: 0.68rem; color: var(--muted);
+      letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500;
+    }
+
+    /* ── PROFILE GRID ── */
+    .profile-grid {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 1.5rem;
+      opacity: 0; animation: fadeUp 0.8s cubic-bezier(0.22,1,0.36,1) 0.3s forwards;
+    }
+    .profile-grid.single-column {
+      display: flex; justify-content: center;
+    }
+    .profile-grid.single-column .profile-card {
+      max-width: 480px; width: 100%;
+    }
+
+    /* ── PROFILE CARD ── */
+    .profile-card {
+      background: var(--charcoal);
+      border: 1px solid var(--border);
+      border-radius: 20px; padding: 2.4rem;
+      position: relative; overflow: hidden;
+      transition: border-color 0.3s, transform 0.3s;
+    }
+    .profile-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      transform: scaleX(0); transition: transform 0.4s ease;
+    }
+    .profile-card:hover::before { transform: scaleX(1); }
+    .profile-card::after {
+      content: ''; position: absolute;
+      width: 200px; height: 200px;
+      background: radial-gradient(circle, rgba(201,168,76,0.08) 0%, transparent 70%);
+      top: -60px; right: -60px; border-radius: 50%; pointer-events: none;
+    }
+
+    .profile-avatar {
+      width: 100px; height: 100px; border-radius: 50%;
+      background: linear-gradient(135deg, rgba(201,168,76,0.2), rgba(201,168,76,0.05));
+      border: 1px solid rgba(201,168,76,0.3);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 1.6rem;
+      font-size: 2.2rem; color: var(--gold);
+      position: relative; overflow: hidden;
+    }
+    .profile-avatar::before {
+      content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(201,168,76,0.15), transparent);
+      transition: left 0.5s;
+    }
+    .profile-card:hover .profile-avatar::before { left: 100%; }
+
+    .profile-info { text-align: center; margin-bottom: 2rem; }
+    .profile-info h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.8rem; font-weight: 700; color: var(--bone);
+      margin-bottom: 0.6rem; letter-spacing: -0.01em;
+    }
+    .profile-badge {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: rgba(201,168,76,0.1);
+      border: 1px solid rgba(201,168,76,0.28);
+      border-radius: 100px; padding: 0.35rem 1rem;
+      font-size: 0.7rem; font-weight: 600;
+      color: var(--gold-light); letter-spacing: 0.12em; text-transform: uppercase;
+    }
+    .badge-dot { width:6px;height:6px;background:var(--gold);border-radius:50%; }
+
+    .info-item {
+      display: flex; align-items: center; gap: 1rem;
+      padding: 0.9rem 1rem; margin-bottom: 0.6rem;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-left: 2px solid rgba(201,168,76,0.4);
+      border-radius: 10px;
+      transition: background 0.2s, transform 0.2s;
+    }
+    .info-item:hover { background: rgba(201,168,76,0.05); transform: translateX(4px); }
+    .info-item i { font-size: 1rem; color: var(--gold); width: 18px; text-align: center; }
+    .info-item-label {
+      font-size: 0.65rem; color: var(--muted);
+      font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em;
+    }
+    .info-item-value { font-size: 0.9rem; color: var(--bone); font-weight: 400; margin-top: 0.15rem; }
+
+    .action-buttons { display: flex; gap: 0.8rem; margin-top: 2rem; }
+    .btn {
+      flex: 1; padding: 0.8rem 1.2rem; border: none; border-radius: 8px;
+      font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 0.82rem;
+      letter-spacing: 0.04em; cursor: pointer; transition: all 0.3s;
+      display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+      text-decoration: none;
+    }
+    .btn-primary {
+      background: var(--gold); color: var(--ink);
+      box-shadow: 0 4px 20px rgba(201,168,76,0.25);
+    }
+    .btn-primary:hover {
+      background: var(--gold-light); transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(201,168,76,0.35);
+    }
+    .btn-outline {
+      background: transparent; color: var(--bone);
+      border: 1px solid var(--border);
+    }
+    .btn-outline:hover { border-color: var(--gold); color: var(--gold); transform: translateY(-2px); }
+
+    /* ── VERIFICATION SECTION ── */
+    .verification-section {
+      background: var(--charcoal);
+      border: 1px solid var(--border);
+      border-radius: 20px; padding: 2.4rem;
+      position: relative; overflow: hidden;
+      transition: border-color 0.3s;
+    }
+    .verification-section::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      transform: scaleX(0); transition: transform 0.4s ease;
+    }
+    .verification-section:hover::before { transform: scaleX(1); }
+    .verification-section::after {
+      content: ''; position: absolute;
+      width: 300px; height: 300px;
+      background: radial-gradient(circle, rgba(201,168,76,0.06) 0%, transparent 70%);
+      top: -80px; right: -80px; border-radius: 50%; pointer-events: none;
+    }
+
+    .section-header {
+      display: flex; align-items: center; gap: 1.2rem;
+      margin-bottom: 2rem; padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .section-icon-wrap {
+      width: 44px; height: 44px; border-radius: 12px;
+      background: rgba(201,168,76,0.08);
+      border: 1px solid rgba(201,168,76,0.18);
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.3s;
+    }
+    .verification-section:hover .section-icon-wrap { background: rgba(201,168,76,0.14); }
+    .section-icon-wrap i { color: var(--gold); font-size: 1.1rem; }
+    .section-header h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.4rem; font-weight: 700; color: var(--bone);
+    }
+    .section-header p { font-size: 0.82rem; color: var(--muted); font-weight: 300; margin-top: 0.2rem; }
+
+    .video-container {
+      position: relative; border-radius: 14px; overflow: hidden;
+      background: #000; margin-bottom: 1.4rem;
+      border: 1px solid var(--border);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    }
+    .video-container video {
+      width: 100%; height: auto; display: block; max-height: 440px; object-fit: contain;
+    }
+    .video-overlay {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      background: linear-gradient(transparent, rgba(0,0,0,0.85));
+      padding: 1rem;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .recording-indicator {
+      display: none; align-items: center; gap: 0.5rem;
+      color: var(--danger); font-weight: 600; font-size: 0.8rem;
+      letter-spacing: 0.1em; text-transform: uppercase;
+    }
+    .recording-indicator.active { display: flex; }
+    .recording-dot {
+      width: 10px; height: 10px; background: var(--danger); border-radius: 50%;
+      animation: blink 1s infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1}50%{opacity:0.25} }
+
+    .record-buttons { display: flex; gap: 0.8rem; flex-wrap: wrap; }
+    .record-buttons button { flex: 1; min-width: 140px; }
+
+    .status-message {
+      background: rgba(201,168,76,0.06);
+      border: 1px solid rgba(201,168,76,0.15);
+      border-left: 2px solid var(--gold);
+      padding: 1rem 1.2rem; border-radius: 10px;
+      margin-top: 1rem; display: none; align-items: center; gap: 1rem;
+    }
+    .status-message.show { display: flex; animation: slideIn 0.3s ease; }
+    .status-message.success {
+      background: rgba(16,185,129,0.06);
+      border-color: rgba(16,185,129,0.2); border-left-color: var(--success);
+    }
+    .status-message i { font-size: 1.2rem; color: var(--gold); }
+    .status-message.success i { color: var(--success); }
+    .status-message strong { font-size: 0.85rem; color: var(--bone); font-weight: 600; }
+    .status-message p { font-size: 0.8rem; color: var(--muted); margin: 0.2rem 0 0; }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity:0; transform:translateY(24px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+    @keyframes slideIn {
+      from { opacity:0; transform:translateX(-16px); }
+      to   { opacity:1; transform:translateX(0); }
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 1024px) {
+      .profile-grid { grid-template-columns: 1fr; }
+      .verification-section { max-width: 600px; margin: 0 auto; }
+    }
+    @media (max-width: 768px) {
+      .navbar { flex-direction: column; gap: 1rem; padding: 1rem 4%; }
+      .nav-links { gap: 1.5rem; flex-wrap: wrap; justify-content: center; }
+      .record-buttons { flex-direction: column; }
+      .record-buttons button { min-width: 100%; }
+      .action-buttons { flex-direction: column; }
+    }
+    @media (max-width: 640px) {
+      .nav-links { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-ring" id="cursor-ring"></div>
+
+  <canvas id="hero-canvas"></canvas>
+  <div class="hero-grain"></div>
+
+  <!-- NAVBAR -->
+  <nav class="navbar" id="navbar">
+    <a class="logo" href="{{ url_for('home') }}">Authenti<span>Hire</span></a>
+    <ul class="nav-links">
+      <li><a href="{{ url_for('home') }}">Home</a></li>
+      <li><a href="{{ url_for('about') }}">About</a></li>
+      <li><a href="{{ url_for('contact') }}">Contact</a></li>
+      <li><a href="{{ url_for('profile') }}" class="active">Profile</a></li>
+    </ul>
+    <button class="toggle-btn" onclick="toggleMode()" aria-label="Toggle Theme">
+      <i class="fas fa-sun"></i> <span id="themeText">Light Mode</span>
+    </button>
+  </nav>
+
+  <!-- MAIN -->
+  <div class="container">
+
+    <!-- Page Header -->
+    <div class="page-header">
+      <span class="page-eyebrow">Account Overview</span>
+      <h1>Welcome, <em>{{ user.name }}</em></h1>
+      <p>Manage your account details and verification settings</p>
+    </div>
+
+    <!-- Stats (candidates only) -->
+    {% if user_type == 'candidate' %}
+    <div class="stats-bar">
+      <div class="stat-item">
+        <div class="stat-num">1</div>
+        <div class="stat-label">Video Verified</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">0</div>
+        <div class="stat-label">Interviews</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">Active</div>
+        <div class="stat-label">Account Status</div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Profile Grid -->
+    <div class="profile-grid {% if user_type == 'client' %}single-column{% endif %}">
+
+      <!-- Profile Card -->
+      <div class="profile-card">
+        <div class="profile-avatar">
+          <i class="fas fa-user"></i>
+        </div>
+
+        <div class="profile-info">
+          <h2>{{ user.name }}</h2>
+          <div class="profile-badge">
+            <div class="badge-dot"></div>
+            {{ user_type|capitalize }}
+          </div>
+        </div>
+
+        <div class="info-item">
+          <i class="fas fa-user-tag"></i>
+          <div class="info-item-content">
+            <div class="info-item-label">Username</div>
+            <div class="info-item-value">{{ user.username }}</div>
+          </div>
+        </div>
+
+        <div class="info-item">
+          <i class="fas fa-envelope"></i>
+          <div class="info-item-content">
+            <div class="info-item-label">Email Address</div>
+            <div class="info-item-value">{{ user.email }}</div>
+          </div>
+        </div>
+
+        <div class="info-item">
+          <i class="fas fa-id-badge"></i>
+          <div class="info-item-content">
+            <div class="info-item-label">Account Type</div>
+            <div class="info-item-value">{{ user_type|capitalize }}</div>
+          </div>
+        </div>
+
+        <div class="action-buttons">
+          <a href="{{ url_for('edit_profile') }}" class="btn btn-primary">
+            <i class="fas fa-edit"></i> Edit Profile
+          </a>
+          {% if user_type == 'candidate' %}
+          <a href="{{ url_for('candidate_logout') }}" class="btn btn-outline">
+            <i class="fas fa-sign-out-alt"></i> Logout
+          </a>
+          {% else %}
+          <a href="{{ url_for('client_logout') }}" class="btn btn-outline">
+            <i class="fas fa-sign-out-alt"></i> Logout
+          </a>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Video Verification -->
+      {% if user_type == 'candidate' %}
+      <div class="verification-section">
+        <div class="section-header">
+          <div class="section-icon-wrap">
+            <i class="fas fa-video"></i>
+          </div>
+          <div>
+            <h3>Video Verification</h3>
+            <p>Record a short clip to verify your identity for interviews</p>
+          </div>
+        </div>
+
+        <div class="video-container">
+          <video id="preview" autoplay muted playsinline></video>
+          <video id="playback" controls playsinline style="display:none;"></video>
+          <div class="video-overlay">
+            <div class="recording-indicator" id="recordingIndicator">
+              <div class="recording-dot"></div>
+              <span>Recording</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="record-buttons">
+          <button id="startRecord" class="btn btn-primary">
+            <i class="fas fa-video"></i> Start Recording
+          </button>
+          <button id="stopRecord" class="btn btn-outline" disabled>
+            <i class="fas fa-stop"></i> Stop Recording
+          </button>
+        </div>
+
+        <div class="status-message show" id="statusMessage">
+          <i class="fas fa-info-circle"></i>
+          <div>
+            <strong>Ready to record</strong>
+            <p>Click "Start Recording" to begin your video verification</p>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+    </div>
+  </div>
+
+  <script>
+    /* ── CURSOR ── */
+    const cursor = document.getElementById('cursor');
+    const ring   = document.getElementById('cursor-ring');
+    document.addEventListener('mousemove', e => {
+      cursor.style.left = e.clientX + 'px';
+      cursor.style.top  = e.clientY + 'px';
+      ring.style.left   = e.clientX + 'px';
+      ring.style.top    = e.clientY + 'px';
+    });
+
+    /* ── CANVAS BACKGROUND ── */
+    const canvas = document.getElementById('hero-canvas');
+    const ctx    = canvas.getContext('2d');
+    function resizeCanvas() {
+      canvas.width  = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    class Node {
+      constructor() { this.reset(); }
+      reset() {
+        this.x  = Math.random() * canvas.width;
+        this.y  = Math.random() * canvas.height;
+        this.vx = (Math.random() - 0.5) * 0.25;
+        this.vy = (Math.random() - 0.5) * 0.25;
+        this.r  = Math.random() * 1.5 + 0.5;
+        this.a  = Math.random() * 0.4 + 0.1;
+      }
+      update() {
+        this.x += this.vx; this.y += this.vy;
+        if (this.x < 0 || this.x > canvas.width)  this.vx *= -1;
+        if (this.y < 0 || this.y > canvas.height)  this.vy *= -1;
+      }
+      draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(201,168,76,${this.a})`;
+        ctx.fill();
+      }
+    }
+    const nodes = Array.from({ length: 50 }, () => new Node());
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      nodes.forEach(n => { n.update(); n.draw(); });
+      for (let i = 0; i < nodes.length; i++) {
+        for (let j = i + 1; j < nodes.length; j++) {
+          const dx = nodes[i].x - nodes[j].x;
+          const dy = nodes[i].y - nodes[j].y;
+          const d  = Math.sqrt(dx * dx + dy * dy);
+          if (d < 100) {
+            ctx.beginPath();
+            ctx.moveTo(nodes[i].x, nodes[i].y);
+            ctx.lineTo(nodes[j].x, nodes[j].y);
+            ctx.strokeStyle = `rgba(201,168,76,${0.07 * (1 - d / 100)})`;
+            ctx.lineWidth = 0.5;
+            ctx.stroke();
+          }
+        }
+      }
+      requestAnimationFrame(animate);
+    }
+    animate();
+
+    /* ── NAVBAR SHRINK ── */
+    window.addEventListener('scroll', () => {
+      document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 60);
+    });
+
+    /* ── THEME TOGGLE ── */
+    function toggleMode() {
+      const isLight = document.body.classList.toggle('light-mode');
+      const icon = document.querySelector('.toggle-btn i');
+      const text = document.getElementById('themeText');
+      if (isLight) {
+        icon.className = 'fas fa-moon';
+        text.textContent = 'Dark Mode';
+        localStorage.setItem('theme', 'light');
+      } else {
+        icon.className = 'fas fa-sun';
+        text.textContent = 'Light Mode';
+        localStorage.setItem('theme', 'dark');
+      }
+    }
+    window.addEventListener('load', () => {
+      if (localStorage.getItem('theme') === 'light') {
+        document.body.classList.add('light-mode');
+        document.querySelector('.toggle-btn i').className = 'fas fa-moon';
+        document.getElementById('themeText').textContent = 'Dark Mode';
+      }
+    });
+
+    /* ── VIDEO RECORDING ── */
+    const video     = document.getElementById('preview');
+    const playback  = document.getElementById('playback');
+    const startBtn  = document.getElementById('startRecord');
+    const stopBtn   = document.getElementById('stopRecord');
+    const recInd    = document.getElementById('recordingIndicator');
+    const statusMsg = document.getElementById('statusMessage');
+    let mediaRecorder;
+    let recordedChunks = [];
+
+    function showStatus(message, isSuccess = false) {
+      statusMsg.innerHTML = `
+        <i class="fas ${isSuccess ? 'fa-check-circle' : 'fa-info-circle'}"></i>
+        <div>
+          <strong>${isSuccess ? 'Success!' : 'Status'}</strong>
+          <p>${message}</p>
+        </div>
+      `;
+      statusMsg.className = `status-message show ${isSuccess ? 'success' : ''}`;
+    }
+
+    startBtn?.addEventListener('click', async () => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { width: 1280, height: 720 }, audio: true
+        });
+        video.srcObject = stream;
+        video.style.display = 'block';
+        playback.style.display = 'none';
+
+        mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp9' });
+        recordedChunks = [];
+
+        mediaRecorder.ondataavailable = (event) => {
+          if (event.data.size > 0) recordedChunks.push(event.data);
+        };
+
+        mediaRecorder.onstop = async () => {
+          const blob = new Blob(recordedChunks, { type: 'video/webm' });
+          const formData = new FormData();
+          formData.append('video', blob);
+          showStatus('Uploading your video…');
+          try {
+            const response = await fetch('/upload_video', { method: 'POST', body: formData });
+            const result = await response.json();
+            if (result.path) {
+              showStatus(result.message || 'Video uploaded successfully!', true);
+              playback.src = result.path;
+              playback.style.display = 'block';
+              video.style.display = 'none';
+            } else {
+              showStatus('Upload failed. Please try again.');
+            }
+          } catch (err) {
+            console.error('Upload error:', err);
+            showStatus('Network error. Please check your connection.');
+          }
+        };
+
+        mediaRecorder.start();
+        startBtn.disabled = true;
+        stopBtn.disabled = false;
+        recInd.classList.add('active');
+        showStatus('Recording in progress…');
+      } catch (err) {
+        console.error('Camera/mic error:', err);
+        showStatus('Camera access denied. Please allow permissions.');
+      }
+    });
+
+    stopBtn?.addEventListener('click', () => {
+      if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+        mediaRecorder.stop();
+        video.srcObject.getTracks().forEach(t => t.stop());
+        startBtn.disabled = false;
+        stopBtn.disabled = true;
+        recInd.classList.remove('active');
+        showStatus('Processing your video…');
+      }
+    });
+  </script>
+</body>
+</html>

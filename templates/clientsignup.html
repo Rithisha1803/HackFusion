@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Client Sign Up — AuthentiHire</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --ink:        #07080a;
+      --bone:       #f0ebe0;
+      --gold:       #c9a84c;
+      --gold-light: #e8c870;
+      --charcoal:   #141618;
+      --surface:    #111214;
+      --mid:        #2e3138;
+      --muted:      #6c6f7b;
+      --border:     rgba(255,255,255,0.07);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--ink);
+      color: var(--bone);
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+
+    /* ─── CUSTOM CURSOR ─── */
+    .cursor {
+      width: 8px; height: 8px; background: var(--gold); border-radius: 50%;
+      position: fixed; top: 0; left: 0; pointer-events: none; z-index: 9999;
+      transform: translate(-50%,-50%);
+    }
+    .cursor-ring {
+      width: 34px; height: 34px; border: 1px solid rgba(201,168,76,0.45);
+      border-radius: 50%; position: fixed; top: 0; left: 0;
+      pointer-events: none; z-index: 9998; transform: translate(-50%,-50%);
+      transition: width 0.3s, height 0.3s, border-color 0.3s, top 0.07s, left 0.07s;
+    }
+    body:has(a:hover) .cursor-ring,
+    body:has(button:hover) .cursor-ring { width: 52px; height: 52px; border-color: var(--gold); }
+
+    /* ─── NAVBAR ─── */
+    .navbar {
+      position: fixed; top: 0; width: 100%;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1.6rem 6%; z-index: 1000;
+      transition: padding 0.4s, background 0.4s, border-color 0.4s;
+      border-bottom: 1px solid transparent;
+    }
+    .navbar.scrolled {
+      padding: 1rem 6%;
+      background: rgba(7,8,10,0.88);
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      border-bottom-color: var(--border);
+    }
+    .logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 700; font-size: 1.6rem; letter-spacing: 0.01em;
+      color: var(--bone); line-height: 1; text-decoration: none;
+    }
+    .logo span { color: var(--gold); font-style: italic; }
+    .nav-links { display: flex; list-style: none; gap: 2.5rem; }
+    .nav-links a {
+      text-decoration: none; color: var(--muted);
+      font-size: 0.8rem; font-weight: 500;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--bone); }
+    .toggle-btn {
+      background: transparent; border: 1px solid var(--border); color: var(--muted);
+      padding: 0.45rem 1.1rem; border-radius: 100px;
+      font-family: 'Outfit', sans-serif; font-size: 0.75rem;
+      font-weight: 500; letter-spacing: 0.06em; cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .toggle-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+    /* ─── ANIMATED CANVAS BG ─── */
+    #bg-canvas {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    }
+
+    /* ─── AMBIENT GLOWS ─── */
+    .glow-orb {
+      position: fixed; border-radius: 50%; pointer-events: none; z-index: 0;
+    }
+    .glow-orb-1 {
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(201,168,76,0.06) 0%, transparent 65%);
+      top: -150px; right: -100px;
+      animation: orbDrift1 18s ease-in-out infinite;
+    }
+    .glow-orb-2 {
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(201,168,76,0.04) 0%, transparent 65%);
+      bottom: -100px; left: -80px;
+      animation: orbDrift2 22s ease-in-out infinite;
+    }
+    @keyframes orbDrift1 {
+      0%,100% { transform: translate(0,0); }
+      33%      { transform: translate(-40px, 60px); }
+      66%      { transform: translate(30px, -40px); }
+    }
+    @keyframes orbDrift2 {
+      0%,100% { transform: translate(0,0); }
+      33%      { transform: translate(50px, -50px); }
+      66%      { transform: translate(-30px, 30px); }
+    }
+
+    /* ─── PAGE WRAPPER ─── */
+    .page-wrapper {
+      position: relative; z-index: 1;
+      min-height: 100vh;
+      display: grid; grid-template-columns: 1fr 1fr;
+      padding-top: 80px; /* navbar offset */
+    }
+
+    /* ─── LEFT PANEL ─── */
+    .left-panel {
+      display: flex; flex-direction: column;
+      justify-content: center; align-items: flex-start;
+      padding: 5rem 5% 5rem 8%;
+      position: relative;
+      border-right: 1px solid var(--border);
+      opacity: 0; transform: translateX(-30px);
+      animation: panelIn 0.9s cubic-bezier(0.22,1,0.36,1) 0.2s forwards;
+    }
+
+    .left-eyebrow {
+      font-size: 0.7rem; font-weight: 600; color: var(--gold);
+      letter-spacing: 0.2em; text-transform: uppercase;
+      margin-bottom: 1.2rem;
+      display: flex; align-items: center; gap: 0.6rem;
+    }
+    .left-eyebrow::before {
+      content: ''; width: 28px; height: 1px; background: var(--gold);
+    }
+
+    .left-panel h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2.8rem, 4.5vw, 4.5rem);
+      font-weight: 700; line-height: 0.95;
+      letter-spacing: -0.02em; color: var(--bone);
+      margin-bottom: 1.5rem;
+    }
+    .left-panel h1 em { font-style: italic; color: var(--gold); }
+
+    .left-panel p {
+      font-size: 0.95rem; font-weight: 300;
+      color: var(--muted); line-height: 1.8;
+      max-width: 400px; margin-bottom: 3rem;
+    }
+
+    /* feature list */
+    .feature-list { display: flex; flex-direction: column; gap: 1.1rem; }
+    .feature-item {
+      display: flex; align-items: center; gap: 0.9rem;
+      opacity: 0; transform: translateX(-16px);
+      animation: featureIn 0.6s ease forwards;
+    }
+    .feature-item:nth-child(1) { animation-delay: 0.7s; }
+    .feature-item:nth-child(2) { animation-delay: 0.85s; }
+    .feature-item:nth-child(3) { animation-delay: 1.0s; }
+    .feature-item:nth-child(4) { animation-delay: 1.15s; }
+    @keyframes featureIn {
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    .feature-dot {
+      width: 32px; height: 32px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(201,168,76,0.1);
+      border: 1px solid rgba(201,168,76,0.2);
+      border-radius: 8px;
+    }
+    .feature-dot svg {
+      width: 14px; height: 14px; stroke: var(--gold); fill: none;
+      stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+    }
+    .feature-item span {
+      font-size: 0.85rem; font-weight: 400; color: var(--muted);
+    }
+    .feature-item strong { color: var(--bone); font-weight: 500; }
+
+    /* decorative quote */
+    .left-quote {
+      margin-top: 3.5rem;
+      padding: 1.4rem 1.6rem;
+      background: rgba(201,168,76,0.06);
+      border-left: 2px solid var(--gold);
+      border-radius: 0 8px 8px 0;
+      max-width: 420px;
+      opacity: 0;
+      animation: featureIn 0.7s ease 1.3s forwards;
+    }
+    .left-quote p {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.05rem; font-style: italic;
+      color: var(--bone); line-height: 1.65;
+      font-weight: 400; margin-bottom: 0.5rem;
+    }
+    .left-quote cite {
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.72rem; color: var(--gold);
+      letter-spacing: 0.1em; text-transform: uppercase;
+      font-style: normal; font-weight: 500;
+    }
+
+    /* ─── RIGHT PANEL (FORM) ─── */
+    .right-panel {
+      display: flex; flex-direction: column;
+      justify-content: center; align-items: center;
+      padding: 4rem 8% 4rem 5%;
+      opacity: 0; transform: translateX(30px);
+      animation: panelIn 0.9s cubic-bezier(0.22,1,0.36,1) 0.35s forwards;
+    }
+
+    @keyframes panelIn {
+      to { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes panelInY {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .form-container {
+      width: 100%; max-width: 460px;
+    }
+
+    .form-header { margin-bottom: 2.5rem; }
+    .form-header-eyebrow {
+      font-size: 0.7rem; font-weight: 600; color: var(--gold);
+      letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 0.6rem;
+      display: block;
+    }
+    .form-header h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2.2rem; font-weight: 700;
+      color: var(--bone); letter-spacing: -0.01em; line-height: 1.1;
+    }
+    .form-header p {
+      font-size: 0.85rem; font-weight: 300; color: var(--muted);
+      margin-top: 0.4rem; line-height: 1.6;
+    }
+
+    /* step indicators */
+    .steps {
+      display: flex; align-items: center; gap: 0;
+      margin-bottom: 2.4rem;
+    }
+    .step {
+      display: flex; flex-direction: column; align-items: center; gap: 0.35rem;
+      flex: 1;
+    }
+    .step-circle {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem; font-weight: 600;
+      border: 1px solid var(--border);
+      color: var(--muted); background: var(--charcoal);
+      transition: all 0.3s;
+    }
+    .step.active .step-circle {
+      background: var(--gold); color: var(--ink); border-color: var(--gold);
+    }
+    .step.done .step-circle {
+      background: rgba(201,168,76,0.15); color: var(--gold); border-color: rgba(201,168,76,0.4);
+    }
+    .step-label {
+      font-size: 0.65rem; font-weight: 500;
+      color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase;
+    }
+    .step.active .step-label { color: var(--gold); }
+    .step-line {
+      flex: 1; height: 1px; background: var(--border); margin-bottom: 1.4rem;
+      transition: background 0.3s;
+    }
+    .step-line.done { background: rgba(201,168,76,0.3); }
+
+    /* form panels */
+    .auth-form { width: 100%; }
+
+    .form-group { margin-bottom: 1rem; position: relative; }
+    .form-group label {
+      display: block; font-size: 0.7rem; font-weight: 600;
+      color: var(--muted); letter-spacing: 0.1em;
+      text-transform: uppercase; margin-bottom: 0.45rem;
+    }
+    .input-wrap { position: relative; }
+    .input-wrap svg {
+      position: absolute; left: 1rem; top: 50%; transform: translateY(-50%);
+      width: 16px; height: 16px; stroke: var(--muted); fill: none;
+      stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round;
+      pointer-events: none; transition: stroke 0.2s;
+    }
+
+    .auth-form input {
+      width: 100%;
+      padding: 0.875rem 1rem 0.875rem 2.9rem;
+      background: var(--charcoal);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 0.875rem;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 300; color: var(--bone);
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+    }
+    .auth-form input::placeholder { color: var(--muted); }
+    .auth-form input:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(201,168,76,0.1);
+    }
+    .auth-form input:focus + svg,
+    .input-wrap:focus-within svg { stroke: var(--gold); }
+
+    /* step sections */
+    .step-section {
+      background: rgba(201,168,76,0.03);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.6rem;
+      margin-bottom: 1.2rem;
+    }
+    .step-section-label {
+      font-size: 0.65rem; font-weight: 700; color: var(--gold);
+      letter-spacing: 0.16em; text-transform: uppercase;
+      margin-bottom: 1.2rem;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .step-section-label::after {
+      content: ''; flex: 1; height: 1px; background: rgba(201,168,76,0.15);
+    }
+
+    /* OTP button */
+    #sendOtpBtn {
+      width: 100%;
+      background: transparent;
+      color: var(--gold);
+      border: 1px solid rgba(201,168,76,0.4);
+      padding: 0.8rem;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      transition: all 0.3s ease;
+      margin-top: 0.25rem;
+    }
+    #sendOtpBtn:hover {
+      background: rgba(201,168,76,0.1);
+      border-color: var(--gold);
+      transform: translateY(-1px);
+    }
+
+    /* submit button */
+    .auth-form button[type="submit"] {
+      width: 100%; padding: 1rem;
+      background: var(--gold); color: var(--ink);
+      border: none; border-radius: 10px;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700; font-size: 0.95rem;
+      letter-spacing: 0.04em; cursor: pointer;
+      margin-top: 1.4rem;
+      transition: background 0.3s, transform 0.3s, box-shadow 0.3s;
+    }
+    .auth-form button[type="submit"]:hover {
+      background: var(--gold-light);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 32px rgba(201,168,76,0.28);
+    }
+
+    /* auth link */
+    .auth-link {
+      text-align: center; margin-top: 1.8rem;
+      font-size: 0.85rem; font-weight: 300; color: var(--muted);
+    }
+    .auth-link a {
+      color: var(--gold); text-decoration: none; font-weight: 600;
+      transition: color 0.2s;
+    }
+    .auth-link a:hover { color: var(--gold-light); }
+
+    /* divider */
+    .form-divider {
+      display: flex; align-items: center; gap: 1rem;
+      margin: 1.5rem 0;
+    }
+    .form-divider::before,
+    .form-divider::after {
+      content: ''; flex: 1; height: 1px; background: var(--border);
+    }
+    .form-divider span {
+      font-size: 0.7rem; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase;
+    }
+
+    /* trust badges */
+    .trust-row {
+      display: flex; justify-content: center; gap: 1.5rem;
+      margin-top: 2rem; flex-wrap: wrap;
+    }
+    .trust-item {
+      display: flex; align-items: center; gap: 0.4rem;
+      font-size: 0.72rem; color: var(--muted); font-weight: 400;
+    }
+    .trust-item svg {
+      width: 13px; height: 13px; stroke: var(--gold); fill: none;
+      stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+    }
+
+    /* ─── LIGHT MODE ─── */
+    body.light-mode {
+      --ink: #f0ebe0; --bone: #07080a; --charcoal: #e4dfd3;
+      --surface: #ece7db; --mid: #b0aa9e; --muted: #5c5750;
+      --border: rgba(0,0,0,0.1);
+    }
+    body.light-mode .navbar.scrolled { background: rgba(240,235,224,0.9); }
+    body.light-mode .auth-form input { background: #f8f4ec; }
+    body.light-mode .step-section { background: rgba(201,168,76,0.04); }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 900px) {
+      .page-wrapper { grid-template-columns: 1fr; padding-top: 72px; }
+      .left-panel {
+        padding: 4rem 6% 3rem;
+        border-right: none; border-bottom: 1px solid var(--border);
+      }
+      .right-panel { padding: 3rem 6%; }
+      .left-panel h1 { font-size: 2.8rem; }
+    }
+    @media (max-width: 640px) {
+      .nav-links { display: none; }
+      .left-panel h1 { font-size: 2.2rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-ring" id="cursor-ring"></div>
+
+  <!-- Animated background canvas -->
+  <canvas id="bg-canvas"></canvas>
+  <div class="glow-orb glow-orb-1"></div>
+  <div class="glow-orb glow-orb-2"></div>
+
+  <!-- NAVBAR -->
+  <header class="navbar" id="navbar">
+    <a href="/" class="logo">Authenti<span>Hire</span></a>
+    <ul class="nav-links">
+      <li><a href="/">Home</a></li>
+      <li><a href="/about">About</a></li>
+      <li><a href="/contact">Contact</a></li>
+    </ul>
+    <button class="toggle-btn" onclick="toggleMode()" aria-label="Toggle Dark Mode">Light Mode</button>
+  </header>
+
+  <!-- PAGE WRAPPER: split layout -->
+  <div class="page-wrapper">
+
+    <!-- ── LEFT PANEL ── -->
+    <div class="left-panel">
+      <div class="left-eyebrow">Client Portal</div>
+
+      <h1>Hire with<br>complete<br><em>assurance</em></h1>
+
+      <p>Join thousands of companies that have transformed their remote hiring process with real-time AI verification, deepfake detection, and bias-free evaluation.</p>
+
+      <div class="feature-list">
+        <div class="feature-item">
+          <div class="feature-dot">
+            <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <span><strong>Deepfake &amp; liveness detection</strong> on every call</span>
+        </div>
+        <div class="feature-item">
+          <div class="feature-dot">
+            <svg viewBox="0 0 24 24"><ellipse cx="12" cy="12" rx="10" ry="6"/><circle cx="12" cy="12" r="3"/></svg>
+          </div>
+          <span><strong>Real-time gaze tracking</strong> for focus analytics</span>
+        </div>
+        <div class="feature-item">
+          <div class="feature-dot">
+            <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 6 10-6"/><path d="M2 12l10 6 10-6"/></svg>
+          </div>
+          <span><strong>Bias mitigation</strong> built into every evaluation</span>
+        </div>
+        <div class="feature-item">
+          <div class="feature-dot">
+            <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          </div>
+          <span><strong>AI interview analytics</strong> — sentiment &amp; tone</span>
+        </div>
+      </div>
+
+      <div class="left-quote">
+        <p>"AuthentiHire gave us the confidence to hire remotely without compromise."</p>
+        <cite>— Enterprise Client, Financial Services</cite>
+      </div>
+    </div>
+
+    <!-- ── RIGHT PANEL (FORM) ── -->
+    <div class="right-panel">
+      <div class="form-container">
+
+        <div class="form-header">
+          <span class="form-header-eyebrow">Get started free</span>
+          <h2>Create your<br>client account</h2>
+          <p>Set up in under two minutes. No credit card required.</p>
+        </div>
+
+        <!-- Step indicators -->
+        <div class="steps">
+          <div class="step active" id="step-ind-1">
+            <div class="step-circle">1</div>
+            <div class="step-label">Identity</div>
+          </div>
+          <div class="step-line" id="step-line-1"></div>
+          <div class="step" id="step-ind-2">
+            <div class="step-circle">2</div>
+            <div class="step-label">Verify</div>
+          </div>
+        </div>
+
+        <!-- SIGNUP FORM — all backend logic untouched -->
+        <form id="signupForm" class="auth-form">
+
+          <!-- Step 1 -->
+          <div class="step-section">
+            <div class="step-section-label">Your details</div>
+
+            <div class="form-group">
+              <label>Full Name</label>
+              <div class="input-wrap">
+                <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <input type="text" placeholder="e.g. Priya Sharma" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Username</label>
+              <div class="input-wrap">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+                <input type="text" placeholder="Choose a username" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Work Email</label>
+              <div class="input-wrap">
+                <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                <input type="email" placeholder="you@company.com" required>
+              </div>
+            </div>
+
+            <button type="button" id="sendOtpBtn">Send Verification Code &rarr;</button>
+          </div>
+
+          <!-- Step 2 -->
+          <div class="step-section">
+            <div class="step-section-label">Verify &amp; secure</div>
+
+            <div class="form-group">
+              <label>Verification Code</label>
+              <div class="input-wrap">
+                <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                <input type="text" placeholder="Enter OTP from your email" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Create Password</label>
+              <div class="input-wrap">
+                <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><circle cx="12" cy="16" r="1" fill="currentColor" stroke="none"/></svg>
+                <input type="password" placeholder="Min. 8 characters" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Confirm Password</label>
+              <div class="input-wrap">
+                <svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                <input type="password" placeholder="Repeat your password" required>
+              </div>
+            </div>
+          </div>
+
+          <button type="submit">Create Client Account &rarr;</button>
+
+        </form>
+
+        <div class="auth-link">
+          Already have an account? <a href="/client-login-page">Sign in</a>
+        </div>
+
+        <!-- trust row -->
+        <div class="trust-row">
+          <div class="trust-item">
+            <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Bank-level encryption
+          </div>
+          <div class="trust-item">
+            <svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>
+            GDPR compliant
+          </div>
+          <div class="trust-item">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10"/></svg>
+            Global coverage
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div><!-- end .page-wrapper -->
+
+  <script>
+    /* ── CURSOR ── */
+    const cursor = document.getElementById('cursor');
+    const ring   = document.getElementById('cursor-ring');
+    document.addEventListener('mousemove', e => {
+      cursor.style.left = e.clientX + 'px'; cursor.style.top = e.clientY + 'px';
+      ring.style.left   = e.clientX + 'px'; ring.style.top   = e.clientY + 'px';
+    });
+
+    /* ── DARK / LIGHT TOGGLE ── */
+    function toggleMode() {
+      const isLight = document.body.classList.toggle('light-mode');
+      document.querySelector('.toggle-btn').textContent = isLight ? 'Dark Mode' : 'Light Mode';
+      localStorage.setItem('theme', isLight ? 'light' : 'dark');
+    }
+    window.addEventListener('load', () => {
+      if (localStorage.getItem('theme') === 'light') {
+        document.body.classList.add('light-mode');
+        document.querySelector('.toggle-btn').textContent = 'Dark Mode';
+      }
+    });
+
+    /* ── NAVBAR SHRINK ── */
+    window.addEventListener('scroll', () => {
+      document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 60);
+    });
+
+    /* ── BACKGROUND CANVAS ANIMATION ── */
+    (function() {
+      const canvas = document.getElementById('bg-canvas');
+      const ctx    = canvas.getContext('2d');
+      function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+      resize(); window.addEventListener('resize', resize);
+
+      class Node {
+        constructor() { this.reset(); }
+        reset() {
+          this.x  = Math.random() * canvas.width;
+          this.y  = Math.random() * canvas.height;
+          this.vx = (Math.random() - 0.5) * 0.25;
+          this.vy = (Math.random() - 0.5) * 0.25;
+          this.r  = Math.random() * 1.5 + 0.4;
+          this.a  = Math.random() * 0.4 + 0.08;
+        }
+        update() {
+          this.x += this.vx; this.y += this.vy;
+          if (this.x < 0 || this.x > canvas.width)  this.vx *= -1;
+          if (this.y < 0 || this.y > canvas.height)  this.vy *= -1;
+        }
+        draw() {
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(201,168,76,${this.a})`;
+          ctx.fill();
+        }
+      }
+      const nodes = Array.from({ length: 55 }, () => new Node());
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        nodes.forEach(n => { n.update(); n.draw(); });
+        for (let i = 0; i < nodes.length; i++) {
+          for (let j = i+1; j < nodes.length; j++) {
+            const dx = nodes[i].x - nodes[j].x, dy = nodes[i].y - nodes[j].y;
+            const d  = Math.sqrt(dx*dx + dy*dy);
+            if (d < 110) {
+              ctx.beginPath();
+              ctx.moveTo(nodes[i].x, nodes[i].y);
+              ctx.lineTo(nodes[j].x, nodes[j].y);
+              ctx.strokeStyle = `rgba(201,168,76,${0.07*(1-d/110)})`;
+              ctx.lineWidth = 0.5; ctx.stroke();
+            }
+          }
+        }
+        requestAnimationFrame(animate);
+      }
+      animate();
+    })();
+
+    /* ── STEP INDICATOR: highlight step 2 when OTP section is focused ── */
+    const step1 = document.getElementById('step-ind-1');
+    const step2 = document.getElementById('step-ind-2');
+    const stepLine = document.getElementById('step-line-1');
+    const otpInput = document.querySelector('input[placeholder="Enter OTP from your email"]');
+
+    function activateStep2() {
+      step1.classList.remove('active'); step1.classList.add('done');
+      step2.classList.add('active');
+      stepLine.classList.add('done');
+    }
+    otpInput.addEventListener('focus', activateStep2);
+
+    /* ════════════════════════════════════════════
+       EXISTING BACKEND LOGIC — UNCHANGED
+    ════════════════════════════════════════════ */
+    const signupForm = document.getElementById("signupForm");
+    const sendOtpBtn = document.getElementById("sendOtpBtn");
+
+    // OTP Send Logic
+    sendOtpBtn.addEventListener("click", async () => {
+      const email = signupForm.querySelector('input[placeholder="you@company.com"]').value.trim();
+
+      if (!email) {
+        alert("Please enter your email to send OTP");
+        return;
+      }
+
+      try {
+        const response = await fetch("http://127.0.0.1:5000/send-otp", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: email })
+        });
+
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+
+        const data = await response.json();
+        console.log("OTP response:", data);
+
+        if (data.success) {
+          alert("OTP sent to your email!");
+          activateStep2();
+        } else {
+          alert("Error sending OTP: " + data.message);
+        }
+      } catch (error) {
+        console.error("Send OTP Error:", error);
+        alert("Server error. Check your backend.");
+      }
+    });
+
+    // Signup Form Submit Logic
+    signupForm.addEventListener("submit", async function(e) {
+      e.preventDefault();
+
+      const name            = signupForm.querySelector('input[placeholder="e.g. Priya Sharma"]').value;
+      const username        = signupForm.querySelector('input[placeholder="Choose a username"]').value;
+      const email           = signupForm.querySelector('input[placeholder="you@company.com"]').value;
+      const otp             = signupForm.querySelector('input[placeholder="Enter OTP from your email"]').value;
+      const password        = signupForm.querySelector('input[placeholder="Min. 8 characters"]').value;
+      const confirmPassword = signupForm.querySelector('input[placeholder="Repeat your password"]').value;
+
+      if (password !== confirmPassword) {
+        alert("Passwords do not match!");
+        return;
+      }
+
+      try {
+        const res = await fetch("http://127.0.0.1:5000/client-signup", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, username, email, otp, password })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          alert("Signup successful!");
+          window.location.href = "/clientportal";
+        } else {
+          alert("Signup failed: " + data.message);
+        }
+      } catch (err) {
+        console.error("Signup Error:", err);
+        alert("Server error during signup.");
+      }
+    });
+
+    /* ── SCROLL ANIMATION (preserved from original) ── */
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) entry.target.classList.add('show');
+      });
+    }, { threshold: 0.2 });
+
+    document.querySelectorAll('.auth-section, .auth-form input, .auth-form button')
+      .forEach(el => observer.observe(el));
+
+    window.addEventListener('scroll', () => {
+      document.querySelectorAll('.reveal').forEach((el) => {
+        const rect = el.getBoundingClientRect();
+        if (rect.top < window.innerHeight - 100) el.classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>
