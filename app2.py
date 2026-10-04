@@ -4,7 +4,7 @@ from flask_cors import CORS
 from flask_socketio import SocketIO, emit, join_room, leave_room
 import os, sqlite3, random, datetime, threading, time, tempfile
 from werkzeug.utils import secure_filename
-import cv2, numpy as np
+import cv2, numpy as np 
 from fer import FER
 from deepface import DeepFace
 from ultralytics import YOLO
