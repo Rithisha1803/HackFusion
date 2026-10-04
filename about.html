@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>About — AuthentiHire</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --ink:        #07080a;
+      --bone:       #f0ebe0;
+      --gold:       #c9a84c;
+      --gold-light: #e8c870;
+      --charcoal:   #141618;
+      --surface:    #111214;
+      --mid:        #2e3138;
+      --muted:      #6c6f7b;
+      --border:     rgba(255,255,255,0.07);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--ink);
+      color: var(--bone);
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+
+    /* ─── CURSOR ─── */
+    .cursor {
+      width: 8px; height: 8px; background: var(--gold); border-radius: 50%;
+      position: fixed; top: 0; left: 0; pointer-events: none; z-index: 9999;
+      transform: translate(-50%,-50%);
+    }
+    .cursor-ring {
+      width: 34px; height: 34px; border: 1px solid rgba(201,168,76,0.45); border-radius: 50%;
+      position: fixed; top: 0; left: 0; pointer-events: none; z-index: 9998;
+      transform: translate(-50%,-50%);
+      transition: width 0.3s, height 0.3s, border-color 0.3s, top 0.07s, left 0.07s;
+    }
+    body:has(a:hover) .cursor-ring,
+    body:has(button:hover) .cursor-ring { width: 52px; height: 52px; border-color: var(--gold); }
+
+    /* ─── NAVBAR ─── */
+    .navbar {
+      position: fixed; top: 0; width: 100%;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1.6rem 6%; z-index: 1000;
+      transition: padding 0.4s, background 0.4s, border-color 0.4s;
+      border-bottom: 1px solid transparent;
+    }
+    .navbar.scrolled {
+      padding: 1rem 6%;
+      background: rgba(7,8,10,0.88);
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      border-bottom-color: var(--border);
+    }
+    .logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 700; font-size: 1.6rem; letter-spacing: 0.01em;
+      color: var(--bone); line-height: 1; text-decoration: none;
+    }
+    .logo span { color: var(--gold); font-style: italic; }
+    .nav-links { display: flex; list-style: none; gap: 2.5rem; }
+    .nav-links a {
+      text-decoration: none; color: var(--muted);
+      font-size: 0.8rem; font-weight: 500;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      transition: color 0.2s; position: relative;
+    }
+    .nav-links a:hover,
+    .nav-links a.active { color: var(--bone); }
+    .nav-links a.active::after {
+      content: ''; position: absolute; bottom: -4px; left: 0;
+      width: 100%; height: 1px; background: var(--gold);
+    }
+    .toggle-btn {
+      background: transparent; border: 1px solid var(--border); color: var(--muted);
+      padding: 0.45rem 1.1rem; border-radius: 100px;
+      font-family: 'Outfit', sans-serif; font-size: 0.75rem;
+      font-weight: 500; letter-spacing: 0.06em; cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .toggle-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+    /* ─── PAGE HERO ─── */
+    .page-hero {
+      position: relative;
+      padding: 14rem 6% 7rem;
+      text-align: center;
+      overflow: hidden;
+    }
+    .page-hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(201,168,76,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .page-hero-eyebrow {
+      display: inline-block;
+      font-size: 0.7rem; font-weight: 600; color: var(--gold);
+      letter-spacing: 0.2em; text-transform: uppercase;
+      margin-bottom: 1.2rem;
+      opacity: 0; transform: translateY(16px);
+      animation: heroUp 0.8s cubic-bezier(0.22,1,0.36,1) 0.1s forwards;
+    }
+    .page-hero h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(3rem, 7vw, 6rem);
+      font-weight: 700; line-height: 0.95;
+      letter-spacing: -0.02em; color: var(--bone);
+      margin-bottom: 1.5rem;
+      opacity: 0; transform: translateY(24px);
+      animation: heroUp 0.9s cubic-bezier(0.22,1,0.36,1) 0.25s forwards;
+    }
+    .page-hero h1 em { font-style: italic; color: var(--gold); }
+    .page-hero p {
+      font-size: clamp(1rem, 1.8vw, 1.15rem);
+      font-weight: 300; color: var(--muted);
+      max-width: 600px; margin: 0 auto; line-height: 1.75;
+      opacity: 0; transform: translateY(20px);
+      animation: heroUp 0.9s cubic-bezier(0.22,1,0.36,1) 0.4s forwards;
+    }
+    @keyframes heroUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ─── DIVIDER ─── */
+    .gold-divider {
+      width: 60px; height: 1px;
+      background: var(--gold); opacity: 0.5;
+      margin: 0 auto 5rem;
+    }
+
+    /* ─── SECTION WRAPPER ─── */
+    .section { padding: 0 6% 8rem; }
+
+    /* scroll reveal base */
+    .reveal {
+      opacity: 0; transform: translateY(32px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .reveal.in-view { opacity: 1; transform: translateY(0); }
+    .reveal-left {
+      opacity: 0; transform: translateX(-32px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .reveal-left.in-view { opacity: 1; transform: translateX(0); }
+    .reveal-right {
+      opacity: 0; transform: translateX(32px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .reveal-right.in-view { opacity: 1; transform: translateX(0); }
+
+    /* ─── MISSION GRID ─── */
+    .mission-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 1px; background: var(--border);
+      border: 1px solid var(--border); border-radius: 16px; overflow: hidden;
+      max-width: 1200px; margin: 0 auto;
+    }
+    .mission-card {
+      background: var(--charcoal); padding: 3rem 2.6rem;
+      position: relative; overflow: hidden;
+      opacity: 0; transform: translateY(28px);
+      transition: opacity 0.65s ease, transform 0.65s ease, background 0.3s;
+    }
+    .mission-card.in-view { opacity: 1; transform: translateY(0); }
+    .mission-card:nth-child(1) { transition-delay: 0s; }
+    .mission-card:nth-child(2) { transition-delay: 0.1s; }
+    .mission-card:nth-child(3) { transition-delay: 0.2s; }
+    .mission-card:hover { background: #181a1e; }
+    .mission-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      transform: scaleX(0); transition: transform 0.4s;
+    }
+    .mission-card:hover::before { transform: scaleX(1); }
+
+    .mission-icon-wrap {
+      width: 48px; height: 48px;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(201,168,76,0.08); border: 1px solid rgba(201,168,76,0.18);
+      border-radius: 12px; margin-bottom: 1.5rem;
+      transition: background 0.3s, border-color 0.3s;
+    }
+    .mission-card:hover .mission-icon-wrap {
+      background: rgba(201,168,76,0.14); border-color: rgba(201,168,76,0.35);
+    }
+    .mission-icon-wrap svg {
+      width: 22px; height: 22px; stroke: var(--gold); fill: none;
+      stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round;
+    }
+    .mission-card h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.5rem; font-weight: 700; color: var(--bone);
+      margin-bottom: 0.9rem; letter-spacing: -0.01em;
+    }
+    .mission-card p { font-size: 0.9rem; font-weight: 300; color: var(--muted); line-height: 1.75; }
+
+    /* ─── SECTION HEADING ─── */
+    .section-eyebrow {
+      display: block; font-size: 0.7rem; font-weight: 600;
+      color: var(--gold); letter-spacing: 0.2em; text-transform: uppercase;
+      margin-bottom: 0.9rem;
+    }
+    .section-heading {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2.2rem, 4vw, 3.5rem); font-weight: 700;
+      line-height: 1.05; letter-spacing: -0.01em; color: var(--bone);
+      margin-bottom: 4rem;
+    }
+    .section-heading em { font-style: italic; color: var(--gold); }
+
+    /* ─── STATS BAND ─── */
+    .stats-band {
+      background: var(--charcoal);
+      border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+      display: flex; margin-bottom: 8rem;
+    }
+    .stats-band .stat-item {
+      flex: 1; text-align: center; padding: 3rem 1.5rem;
+      border-right: 1px solid var(--border);
+      opacity: 0; transform: translateY(20px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .stats-band .stat-item:last-child { border-right: none; }
+    .stats-band .stat-item.in-view { opacity: 1; transform: translateY(0); }
+    .stats-band .stat-item:nth-child(1) { transition-delay: 0s; }
+    .stats-band .stat-item:nth-child(2) { transition-delay: 0.1s; }
+    .stats-band .stat-item:nth-child(3) { transition-delay: 0.2s; }
+    .stats-band .stat-item:nth-child(4) { transition-delay: 0.3s; }
+    .stat-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 3rem; font-weight: 700; color: var(--gold);
+      line-height: 1; margin-bottom: 0.4rem;
+    }
+    .stat-label { font-size: 0.72rem; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500; }
+
+    /* ─── VALUES GRID ─── */
+    .values-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem; max-width: 1200px; margin: 0 auto;
+    }
+    .value-card {
+      background: var(--charcoal);
+      border: 1px solid var(--border); border-radius: 14px;
+      padding: 2.2rem;
+      opacity: 0; transform: translateY(24px);
+      transition: opacity 0.6s ease, transform 0.6s ease, border-color 0.3s, background 0.3s;
+    }
+    .value-card.in-view { opacity: 1; transform: translateY(0); }
+    .value-card:nth-child(1) { transition-delay: 0s; }
+    .value-card:nth-child(2) { transition-delay: 0.07s; }
+    .value-card:nth-child(3) { transition-delay: 0.14s; }
+    .value-card:nth-child(4) { transition-delay: 0.21s; }
+    .value-card:nth-child(5) { transition-delay: 0.28s; }
+    .value-card:nth-child(6) { transition-delay: 0.35s; }
+    .value-card:hover {
+      border-color: rgba(201,168,76,0.3); background: #181a1e;
+      transform: translateY(-4px);
+    }
+    .value-icon {
+      width: 40px; height: 40px;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(201,168,76,0.08); border: 1px solid rgba(201,168,76,0.18);
+      border-radius: 10px; margin-bottom: 1.1rem;
+    }
+    .value-icon svg {
+      width: 18px; height: 18px; stroke: var(--gold); fill: none;
+      stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round;
+    }
+    .value-card h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.2rem; font-weight: 700; color: var(--bone); margin-bottom: 0.6rem;
+    }
+    .value-card p { font-size: 0.875rem; font-weight: 300; color: var(--muted); line-height: 1.7; }
+
+    /* ─── TEAM / CTA BLOCK ─── */
+    .team-block {
+      max-width: 820px; margin: 0 auto; text-align: center;
+      padding: 5rem 3rem;
+      background: var(--charcoal);
+      border: 1px solid var(--border); border-radius: 20px;
+      position: relative; overflow: hidden;
+    }
+    .team-block::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(201,168,76,0.07) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .team-block h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2rem, 4vw, 3rem); font-weight: 700;
+      color: var(--bone); margin-bottom: 1.25rem; letter-spacing: -0.01em;
+      position: relative;
+    }
+    .team-block h2 em { font-style: italic; color: var(--gold); }
+    .team-block p {
+      font-size: 0.95rem; font-weight: 300; color: var(--muted);
+      line-height: 1.8; margin-bottom: 1.25rem; position: relative;
+    }
+    .cta-btn {
+      display: inline-block;
+      margin-top: 1rem;
+      padding: 0.9rem 2.6rem;
+      background: var(--gold); color: var(--ink);
+      border-radius: 6px; text-decoration: none;
+      font-family: 'Outfit', sans-serif; font-weight: 700;
+      font-size: 0.9rem; letter-spacing: 0.04em;
+      transition: background 0.3s, transform 0.3s, box-shadow 0.3s;
+      position: relative;
+    }
+    .cta-btn:hover {
+      background: var(--gold-light); transform: translateY(-3px);
+      box-shadow: 0 16px 40px rgba(201,168,76,0.3);
+    }
+
+    /* ─── FOOTER ─── */
+    footer {
+      background: var(--charcoal); border-top: 1px solid var(--border);
+      padding: 2.8rem 6%; display: flex; justify-content: space-between;
+      align-items: center; flex-wrap: wrap; gap: 1rem;
+    }
+    .footer-logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.4rem; font-weight: 700; color: var(--bone);
+    }
+    .footer-logo span { color: var(--gold); font-style: italic; }
+    footer p { font-size: 0.78rem; color: var(--muted); font-weight: 300; }
+
+    /* ─── LIGHT MODE ─── */
+    body.light-mode {
+      --ink: #f0ebe0; --bone: #07080a; --charcoal: #e4dfd3;
+      --surface: #ece7db; --mid: #b0aa9e; --muted: #5c5750;
+      --border: rgba(0,0,0,0.1);
+    }
+    body.light-mode .navbar.scrolled { background: rgba(240,235,224,0.9); }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 960px) {
+      .mission-grid { grid-template-columns: 1fr; }
+      .values-grid  { grid-template-columns: repeat(2,1fr); }
+      .stats-band   { flex-wrap: wrap; }
+      .stats-band .stat-item { min-width: 50%; border-right: none; border-bottom: 1px solid var(--border); }
+    }
+    @media (max-width: 640px) {
+      .nav-links { display: none; }
+      .values-grid { grid-template-columns: 1fr; }
+      footer { flex-direction: column; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-ring" id="cursor-ring"></div>
+
+  <!-- NAVBAR -->
+  <header class="navbar" id="navbar">
+    <a href="/" class="logo">Authenti<span>Hire</span></a>
+    <ul class="nav-links">
+      <li><a href="/">Home</a></li>
+      <li><a href="/about" class="active">About</a></li>
+      <li><a href="/contact">Contact</a></li>
+    </ul>
+    <button class="toggle-btn" onclick="toggleMode()">Light Mode</button>
+  </header>
+
+  <!-- PAGE HERO -->
+  <section class="page-hero">
+    <span class="page-hero-eyebrow">Who We Are</span>
+    <h1>Transforming Recruitment<br>with <em>AI-Powered Trust</em></h1>
+    <p>AuthentiHire is pioneering the future of authentic, transparent, and fraud-free digital hiring through cutting-edge artificial intelligence.</p>
+  </section>
+
+  <div class="gold-divider"></div>
+
+  <!-- MISSION -->
+  <section class="section">
+    <div class="mission-grid">
+
+      <div class="mission-card">
+        <div class="mission-icon-wrap">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3v9l5 3"/></svg>
+        </div>
+        <h3>Our Mission</h3>
+        <p>To eliminate fraud and bias in digital recruitment by providing companies with AI-powered verification tools that ensure every candidate is genuine, qualified, and fairly evaluated.</p>
+      </div>
+
+      <div class="mission-card">
+        <div class="mission-icon-wrap">
+          <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </div>
+        <h3>Our Vision</h3>
+        <p>A world where remote hiring is as trustworthy as in-person interviews, where technology empowers fair opportunities, and where authenticity is guaranteed at every step.</p>
+      </div>
+
+      <div class="mission-card">
+        <div class="mission-icon-wrap">
+          <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        </div>
+        <h3>Our Approach</h3>
+        <p>Combining advanced machine learning, behavioral analytics, and real-time verification to create a seamless, secure, and intelligent recruitment ecosystem.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- STATS BAND -->
+  <div class="stats-band">
+    <div class="stat-item scroll-watch"><div class="stat-num">99.7%</div><div class="stat-label">Detection Accuracy</div></div>
+    <div class="stat-item scroll-watch"><div class="stat-num">500K+</div><div class="stat-label">Interviews Verified</div></div>
+    <div class="stat-item scroll-watch"><div class="stat-num">2,000+</div><div class="stat-label">Companies Trust Us</div></div>
+    <div class="stat-item scroll-watch"><div class="stat-num">85%</div><div class="stat-label">Fraud Reduction</div></div>
+  </div>
+
+  <!-- VALUES -->
+  <section class="section">
+    <span class="section-eyebrow reveal">Core Values</span>
+    <h2 class="section-heading reveal">What we stand <em>for</em></h2>
+    <div class="values-grid">
+
+      <div class="value-card">
+        <div class="value-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <h3>Trust &amp; Security</h3>
+        <p>We prioritize data protection and candidate privacy while maintaining the highest standards of security in every verification process.</p>
+      </div>
+
+      <div class="value-card">
+        <div class="value-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        </div>
+        <h3>Fairness &amp; Equity</h3>
+        <p>Our AI is designed to reduce bias and promote equal opportunities, ensuring every candidate is evaluated on merit alone.</p>
+      </div>
+
+      <div class="value-card">
+        <div class="value-icon">
+          <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        </div>
+        <h3>Innovation</h3>
+        <p>We continuously advance our technology to stay ahead of evolving threats and provide the most sophisticated verification solutions.</p>
+      </div>
+
+      <div class="value-card">
+        <div class="value-icon">
+          <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </div>
+        <h3>Transparency</h3>
+        <p>We believe in clear communication about our processes, giving both companies and candidates visibility into how our system works.</p>
+      </div>
+
+      <div class="value-card">
+        <div class="value-icon">
+          <svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        </div>
+        <h3>Continuous Learning</h3>
+        <p>Our AI evolves with every interaction, learning from global hiring patterns to deliver increasingly accurate and reliable results.</p>
+      </div>
+
+      <div class="value-card">
+        <div class="value-icon">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        </div>
+        <h3>Global Impact</h3>
+        <p>We're committed to making authentic hiring accessible worldwide, breaking down barriers and enabling fair opportunities across borders.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- TEAM CTA -->
+  <section class="section">
+    <div class="team-block reveal">
+      <h2>Built by <em>experts</em>, trusted by leaders</h2>
+      <p>Our team brings together expertise in artificial intelligence, cybersecurity, behavioral psychology, and recruitment technology. We're passionate about solving one of the biggest challenges in modern hiring: ensuring authenticity in a digital-first world.</p>
+      <p>Backed by leading investors and trusted by enterprises globally, AuthentiHire is setting new standards for what recruitment technology can achieve.</p>
+      <a href="/contact" class="cta-btn">Get in Touch &rarr;</a>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-logo">Authenti<span>Hire</span></div>
+    <p>&copy; 2025 AuthentiHire. Verified hiring, reimagined.</p>
+  </footer>
+
+  <script>
+    /* ── CURSOR ── */
+    const cursor = document.getElementById('cursor');
+    const ring   = document.getElementById('cursor-ring');
+    document.addEventListener('mousemove', e => {
+      cursor.style.left = e.clientX + 'px'; cursor.style.top = e.clientY + 'px';
+      ring.style.left   = e.clientX + 'px'; ring.style.top   = e.clientY + 'px';
+    });
+
+    /* ── DARK / LIGHT TOGGLE ── */
+    function toggleMode() {
+      const isLight = document.body.classList.toggle('light-mode');
+      document.querySelector('.toggle-btn').textContent = isLight ? 'Dark Mode' : 'Light Mode';
+      localStorage.setItem('theme', isLight ? 'light' : 'dark');
+    }
+    window.addEventListener('load', () => {
+      if (localStorage.getItem('theme') === 'light') {
+        document.body.classList.add('light-mode');
+        document.querySelector('.toggle-btn').textContent = 'Dark Mode';
+      }
+    });
+
+    /* ── NAVBAR SHRINK ── */
+    window.addEventListener('scroll', () => {
+      document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 60);
+    });
+
+    /* ── SCROLL ANIMATIONS ── */
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in-view'); });
+    }, { threshold: 0.12 });
+
+    document.querySelectorAll(
+      '.mission-card, .stat-item, .value-card, .reveal, .reveal-left, .reveal-right, .scroll-watch'
+    ).forEach(el => io.observe(el));
+  </script>
+</body>
+</html>
