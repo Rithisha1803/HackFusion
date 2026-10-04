@@ -9,7 +9,7 @@ from fer import FER
 from deepface import DeepFace
 from ultralytics import YOLO
 import librosa
-import mediapipe as mp
+import mediapipe as mp 
 import smtplib
 import base64
 
