@@ -1,6 +1,6 @@
 import os
 
-
+ 
 UPLOAD_FOLDER = "uploads"  # folder where videos are stored
 
 videos = []
